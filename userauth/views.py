@@ -2,7 +2,7 @@ from itertools import chain
 from  django . shortcuts  import  get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from . models import  Followers, LikePost, Post, Profile
 from django.db.models import Q
@@ -23,7 +23,7 @@ def signup(request):
         new_profile = Profile.objects.create(user=user_model, id_user=user_model.id)
         new_profile.save()
         if my_user is not None:
-            login(request,my_user)
+            auth_login(request,my_user)
             return redirect('/')
         return redirect('/login')
     
@@ -50,7 +50,7 @@ def login(request):
         print(fnm,pwd)
         userr=authenticate(request,username=fnm,password=pwd)
         if userr is not None:
-            login(request,userr)
+            auth_login(request,userr)
             return redirect('/')
         
  
@@ -68,19 +68,20 @@ def logout_view(request):
 
 @login_required(login_url='/login')
 def home(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+        profile.save()
     
     following_users = Followers.objects.filter(follower=request.user.username).values_list('user', flat=True)
-
-    
     post = Post.objects.filter(Q(user=request.user.username) | Q(user__in=following_users)).order_by('-created_at')
-
-    profile = Profile.objects.get(user=request.user)
 
     context = {
         'post': post,
         'profile': profile,
     }
-    return render(request, 'main.html',context)
+    return render(request, 'main.html', context)
     
 
 
@@ -124,22 +125,36 @@ def likes(request, id):
     
 @login_required(login_url='/login')
 def explore(request):
-    post=Post.objects.all().order_by('-created_at')
-    profile = Profile.objects.get(user=request.user)
+    post = Post.objects.all().order_by('-created_at')
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+        profile.save()
 
-    context={
-        'post':post,
-        'profile':profile
-        
+    context = {
+        'post': post,
+        'profile': profile
     }
-    return render(request, 'explore.html',context)
+    return render(request, 'explore.html', context)
     
 @login_required(login_url='/login')
-def profile(request,id_user):
+def profile(request, id_user):
     user_object = User.objects.get(username=id_user)
     print(user_object)
-    profile = Profile.objects.get(user=request.user)
-    user_profile = Profile.objects.get(user=user_object)
+    
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+        profile.save()
+    
+    try:
+        user_profile = Profile.objects.get(user=user_object)
+    except Profile.DoesNotExist:
+        user_profile = Profile.objects.create(user=user_object, id_user=user_object.id)
+        user_profile.save()
+    
     user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
     user_post_length = len(user_posts)
 
@@ -204,25 +219,39 @@ def delete(request, id):
 @login_required(login_url='/login')
 def search_results(request):
     query = request.GET.get('q')
+    
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+        profile.save()
 
-    users = Profile.objects.filter(user__username__icontains=query)
-    posts = Post.objects.filter(caption__icontains=query)
+    users = Profile.objects.filter(user__username__icontains(query))
+    posts = Post.objects.filter(caption__icontains(query))
 
     context = {
         'query': query,
         'users': users,
         'posts': posts,
+        'profile': profile
     }
     return render(request, 'search_user.html', context)
 
-def home_post(request,id):
-    post=Post.objects.get(id=id)
-    profile = Profile.objects.get(user=request.user)
-    context={
-        'post':post,
-        'profile':profile
-    }
-    return render(request, 'main.html',context)
+def home_post(request, id):
+    try:
+        post = Post.objects.get(id=id)
+        profile = Profile.objects.get(user=request.user)
+        context = {
+            'post': post,
+            'profile': profile
+        }
+        return render(request, 'main.html', context)
+    except Post.DoesNotExist:
+        return redirect('/')
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+        profile.save()
+        return redirect('/')
 
 
 

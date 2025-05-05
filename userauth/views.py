@@ -233,8 +233,8 @@ def search_results(request):
         profile = Profile.objects.create(user=request.user, id_user=request.user.id)
         profile.save()
 
-    users = Profile.objects.filter(user__username__icontains(query)
-    posts = Post.objects.filter(caption__icontains=query)
+    users = Profile.objects.filter(user__username__icontains=query)
+    posts = Post.objects.filter(caption__icontains(query)
 
     context = {
         'query': query,

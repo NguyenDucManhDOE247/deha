@@ -16,6 +16,15 @@
             background-color: #f8f9fa;
             height: 100vh;
             color: black;
+            position: fixed;
+            width: 16.666667%;
+            padding-right: 15px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            padding: 20px;
         }
 
         .profile-pic {
@@ -27,6 +36,37 @@
 
         a {
             color: black;
+            text-decoration: none;
+        }
+
+        .search-result-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            height: 100%;
+        }
+
+        .search-result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .post-image {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .user-result {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .user-result:hover {
+            background-color: #f8f9fa;
         }
     </style>
 </head>
@@ -34,14 +74,15 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-2 d-none d-md-block sidebar" style="position: fixed;">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
                 <div class="text-center mt-3">
                     <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
-                    <h4 class="mt-2"><a href="/profile/{{profile.user.username}}" style="text-decoration:none;">@{{profile.user.username}}</a></h4>
+                    <h4 class="mt-2"><a href="/profile/{{profile.user.username}}">@{{profile.user.username}}</a></h4>
                 </div>
                 <ul class="nav flex-column mt-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">
+                        <a class="nav-link" href="/">
                             <i class="fa-solid fa-house mr-1"></i> Home
                         </a>
                     </li>
@@ -51,7 +92,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal3">
+                        <a class="nav-link active" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal3">
                             <i class="fa-solid fa-magnifying-glass mr-1"></i> Search
                         </a>
                     </li>
@@ -72,39 +113,47 @@
                         </a>
                     </li>
                 </ul>
-            </nav>
+            </div>
 
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
                 {% include "modal.html" %}
                 {% include "search.html" %}
+                {% include "messages.html" %}
                 
-                <h1>Search Results for "{{ query }}"</h1>
+                <h1 class="mb-4">Search Results for "{{ query }}"</h1>
                 
-                <div class="container mb-5">
+                <div class="mb-5">
                     <h2>User Profiles</h2>
                     {% if users %}
-                        <table class="table">
-                            <tbody>
-                                {% for user in users %}
-                                <tr>
-                                    <td><h3><a href="/profile/{{user.user.username}}">@{{user.user.username}}</a></h3></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                        <div class="list-group">
+                            {% for user in users %}
+                            <div class="user-result">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ user.profileimg.url }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <div>
+                                        <h5><a href="/profile/{{user.user.username}}">@{{user.user.username}}</a></h5>
+                                        {% if user.location %}
+                                            <small class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ user.location }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     {% else %}
-                        <p>No users found matching "{{ query }}"</p>
+                        <div class="alert alert-secondary">No users found matching "{{ query }}"</div>
                     {% endif %}
                 </div>
                 
-                <div class="container">
+                <div>
                     <h2>Posts</h2>
                     {% if posts %}
-                        <div class="row">
+                        <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
                             {% for post in posts %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card">
-                                    <img src="{{ post.image.url }}" class="card-img-top" alt="..." style="height: 200px; object-fit: cover;">
+                            <div class="col">
+                                <div class="search-result-card">
+                                    <img src="{{ post.image.url }}" class="card-img-top post-image" alt="Post image">
                                     <div class="card-body">
                                         <h5 class="card-title"><a href="/profile/{{post.user}}">@{{post.user}}</a></h5>
                                         <p class="card-text">{{ post.caption }}</p>
@@ -116,10 +165,10 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p>No posts found matching "{{ query }}"</p>
+                        <div class="alert alert-secondary">No posts found matching "{{ query }}"</div>
                     {% endif %}
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 

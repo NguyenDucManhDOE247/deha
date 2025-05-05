@@ -18,6 +18,15 @@
             background-color: #f8f9fa;
             height: 100vh;
             color: black;
+            position: fixed;
+            width: 16.666667%;
+            padding-right: 15px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            padding: 20px;
         }
 
         .profile-pic {
@@ -30,13 +39,65 @@
         a {
             color: black;
         }
+
+        .post-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .post-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            max-height: 500px;
+            background-color: #f8f9fa;
+        }
+
+        .post-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .post-content {
+            padding: 15px;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .post-header h5 {
+            margin: 0;
+            margin-left: 10px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .like-count {
+            margin: 0;
+            font-size: 14px;
+        }
     </style>
 </head>
 
 <body>
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-md-2 d-none d-md-block sidebar" style="position: fixed;">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
             <div class="text-center mt-3">
                 <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
                 <h4 class="mt-2"><a href="/profile/{{user}}" style="text-decoration:none;">@{{user}}</a></h4>
@@ -75,35 +136,46 @@
                     </a>
                 </li>
             </ul>
-        </nav>
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
             {% include "modal.html" %}
             {% include "search.html" %}
             {% include "messages.html" %}
         
-            <div>{% for pos in post %}
-                <div class="container" id="{{pos.id}}">
-                    <div class="row">
-                        <div class="col-md-6 mx-auto">
-                            <div class="post-card" style="border: 1px solid black;margin: 50px;">
-                                <img src="{{pos.image.url}}" alt="Post Image" class="post-image"
-                                    style="height: 584px; width:468px; margin: 25px;">
-                                <div class="post-content" style="margin-left: 19px;">
-                                    <h5><a href="/profile/{{pos.user}}" style="text-decoration: none;">@{{pos.user}}</a></h5>
-                                    <p>{{pos.caption}}</p>
-                                    <p class="text-muted">{{pos.created_at}}</p>
-                                    <hr>
-                                    <div class="d-flex justify-content-between" style="margin-bottom: 8px; margin-right:10px;">
-                                        <a href="/like-post/{{pos.id}}" class="btn btn-outline-primary">Like</a>
-            
-                                        {% if pos.no_of_likes == 0 %}
-                                        <p>0</p>
-                                        {% elif pos.no_of_likes == 1 %}
-                                        <p>Liked by {{pos.no_of_likes}} person</p>
-                                        {% else %}
-                                        <p>Liked by {{pos.no_of_likes}} people</p>
-                                        {% endif %}
-                                    </div>
+            <div>
+                {% for pos in post %}
+                <div class="row" id="{{pos.id}}">
+                    <div class="col-md-8 mx-auto">
+                        <div class="post-card">
+                            <div class="post-header p-3">
+                                <img src="{{profile.profileimg.url}}" alt="Profile" class="rounded-circle" style="width:40px;height:40px">
+                                <h5><a href="/profile/{{pos.user}}" style="text-decoration: none;">@{{pos.user}}</a></h5>
+                            </div>
+                            
+                            <div class="post-image-container">
+                                <img src="{{pos.image.url}}" alt="Post Image" class="post-image">
+                            </div>
+                            
+                            <div class="post-content">
+                                <p>{{pos.caption}}</p>
+                                <p class="text-muted small">{{pos.created_at}}</p>
+                            </div>
+                            
+                            <div class="post-actions">
+                                <a href="/like-post/{{pos.id}}" class="btn btn-outline-primary btn-sm">
+                                    <i class="far fa-heart"></i> Like
+                                </a>
+                                
+                                <div class="like-count">
+                                    {% if pos.no_of_likes == 0 %}
+                                    <span>0 likes</span>
+                                    {% elif pos.no_of_likes == 1 %}
+                                    <span>{{pos.no_of_likes}} like</span>
+                                    {% else %}
+                                    <span>{{pos.no_of_likes}} likes</span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -111,7 +183,7 @@
                 </div>
                 {% endfor %}
             </div>
-        </main>
+        </div>
     </div>
 </div>
    

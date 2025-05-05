@@ -23,6 +23,10 @@
             background-color: #f8f9fa;
             height: 100vh;
             color: black;
+            position: fixed;
+            width: 16.666667%;
+            padding-right: 15px;
+            overflow-y: auto;
         }
 
         .profile-pic {
@@ -36,57 +40,62 @@
             color: black;
         }
 
-        .image_s {
+        .main-content {
+            margin-left: 16.666667%;
+            padding: 20px;
+        }
+
+        .post-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .post-item {
             position: relative;
-            width: 213px;
-        }
-
-        .image__img {
-            display: block;
+            overflow: hidden;
             width: 100%;
+            aspect-ratio: 1/1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
-        .image__overlay {
+        .post-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .post-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            color: #000000;
-            font-family: 'Quicksand', sans-serif;
+            background-color: rgba(255, 255, 255, 0.9);
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             opacity: 0;
-            transition: opacity 0.25s;
+            transition: opacity 0.3s ease;
+            padding: 10px;
         }
 
-        .image__overlay>* {
-            transform: translateY(20px);
-            transition: transform 0.25s;
-        }
-
-        .image__overlay:hover {
+        .post-item:hover .post-overlay {
             opacity: 1;
         }
 
-        .image__overlay:hover>* {
-            transform: translateY(0);
-        }
-
-        .image_s:hover .image__img {
-            opacity: 0.1;
-        }
-
-        .image__title {
-            font-size: 2em;
+        .post-title {
+            font-size: 1.2rem;
             font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .image__description {
-            font-size: 1.25em;
-            margin-top: 0.25em;
+        .post-description {
+            font-size: 0.9rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -94,19 +103,20 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-2 d-none d-md-block sidebar" style="position: fixed;">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
                 <div class="text-center mt-3">
                     <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
-                    <h4 class="mt-2"><a href="/profile/{{user}}" style="text-decoration:none;">@{{user}}</a></h4>
+                    <h4 class="mt-2"><a href="/profile/{{profile.user.username}}" style="text-decoration:none;">@{{profile.user.username}}</a></h4>
                 </div>
                 <ul class="nav flex-column mt-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">
+                        <a class="nav-link" href="/">
                             <i class="fa-solid fa-house mr-1"></i> Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/explore">
+                        <a class="nav-link active" href="/explore">
                             <i class="fa-solid fa-compass mr-1"></i> Explore
                         </a>
                     </li>
@@ -115,7 +125,6 @@
                             <i class="fa-solid fa-magnifying-glass mr-1"></i> Search
                         </a>
                     </li>
-                    
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal"
                             data-bs-whatever="@getbootstrap">
@@ -133,30 +142,31 @@
                         </a>
                     </li>
                 </ul>
-            </nav>
+            </div>
 
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
                 {% include "modal.html" %}
                 {% include "search.html" %}
                 {% include "messages.html" %}
 
-                <div class="container text-center" style="padding: 10px; margin-top:20px;">
-                    <div class="row row-cols-3">
-                        {% for pos in post %}
-                        <div class="col m-2 image_s" style="margin-bottom:10px;">
-                            <img class="image__img" src="{{pos.image.url}}" alt="Post Image"
-                                style="max-width: 213px; max-height:213px">
-                            <div class="image__overlay image__overlay--primary">
-                                <div class="image__title"><a href="/profile/{{pos.user}}">@{{pos.user}}</a></div>
-                                <p class="image__description">
-                                    {{pos.caption}}
-                                </p>
-                            </div>
+                <h2 class="mb-4">Explore Posts</h2>
+
+                <div class="post-grid">
+                    {% for pos in post %}
+                    <div class="post-item">
+                        <img class="post-image" src="{{pos.image.url}}" alt="Post Image">
+                        <div class="post-overlay">
+                            <div class="post-title"><a href="/profile/{{pos.user}}">@{{pos.user}}</a></div>
+                            <p class="post-description">
+                                {{pos.caption}}
+                            </p>
+                            <a href="/#{{pos.id}}" class="btn btn-sm btn-primary mt-2">View Post</a>
                         </div>
-                        {% endfor %}
                     </div>
+                    {% endfor %}
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 

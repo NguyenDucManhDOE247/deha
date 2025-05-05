@@ -141,19 +141,17 @@
 
                                         </div>
                                         <div style="margin-inline-start: auto; margin-top: auto;background:white;">
-                                        <form action="/follow" method="POST">
-                                            {% csrf_token %}  {% if user != user_profile.user %}
-                                            <input type="hidden" value="{{user.username}}" name="follower" />
-                                            <input type="hidden" value="{{user_object.username}}" name="user" />
-                                            <button type="submit" class="btn btn-outline-dark"
-                                                data-mdb-ripple-color="dark" style="z-index: 1; margin: 5px;"
-                                                data-bs-toggle="modal" data-bs-target="#exampleModal1"
-                                                data-bs-whatever="@getbootstrap">
-                                                {{follow_unfollow}}
-                                            </button>
-
-                                            {% endif %}
-</form>
+                                            <form action="/follow" method="POST">
+                                                {% csrf_token %}  
+                                                {% if user != user_profile.user %}
+                                                <input type="hidden" value="{{user.username}}" name="follower" />
+                                                <input type="hidden" value="{{user_object.username}}" name="user" />
+                                                <button type="submit" class="btn btn-outline-dark"
+                                                        data-mdb-ripple-color="dark" style="z-index: 1; margin: 5px;">
+                                                        {{follow_unfollow}}
+                                                </button>
+                                                {% endif %}
+                                            </form>
                                         </div>
 
                                     </div>

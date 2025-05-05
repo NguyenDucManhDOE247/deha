@@ -1,5 +1,5 @@
 from itertools import chain
-from  django . shortcuts  import  get_object_or_404, render, redirect
+from  django . shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout
@@ -121,7 +121,7 @@ def likes(request, id):
         print(post.id)
 
         # Redirect back to the post's detail page
-        return redirect('/#'+id)
+        return redirect('/#'+str(id))
     
 @login_required(login_url='/login')
 def explore(request):
@@ -210,10 +210,13 @@ def profile(request, id_user):
 
 @login_required(login_url='/login')
 def delete(request, id):
-    post = Post.objects.get(id=id)
-    post.delete()
-
-    return redirect('/profile/'+ request.user.username)
+    try:
+        post = Post.objects.get(id=id)
+        if post.user == request.user.username:
+            post.delete()
+        return redirect('/profile/'+ request.user.username)
+    except Post.DoesNotExist:
+        return redirect('/profile/'+ request.user.username)
 
 
 @login_required(login_url='/login')

@@ -48,5 +48,3 @@ admin.site.register(Followers, FollowersAdmin)
 admin.site.site_header = "Social Media Administration"
 admin.site.site_title = "Social Media Admin Portal"
 admin.site.index_title = "Welcome to Social Media Admin Portal"
-Followers._meta.verbose_name = 'Follower'
-Followers._meta.verbose_name_plural = 'Followers'

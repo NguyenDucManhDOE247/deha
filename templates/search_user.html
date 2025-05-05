@@ -83,18 +83,45 @@
                 {% include "search.html" %}
                 
                 <h1>Search Results for "{{ query }}"</h1>
-                <div class="container">
+                
+                <div class="container mb-5">
                     <h2>User Profiles</h2>
-                    
-                    <table class="table">
-                        <tbody>
-                            {% for user in users %}
-                            <tr>
-                                <td><h1><strong><a href="/profile/{{user.user.username}}">@{{user.user.username}}</a> </strong></h1></td>
-                            </tr>
+                    {% if users %}
+                        <table class="table">
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td><h3><a href="/profile/{{user.user.username}}">@{{user.user.username}}</a></h3></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No users found matching "{{ query }}"</p>
+                    {% endif %}
+                </div>
+                
+                <div class="container">
+                    <h2>Posts</h2>
+                    {% if posts %}
+                        <div class="row">
+                            {% for post in posts %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <img src="{{ post.image.url }}" class="card-img-top" alt="..." style="height: 200px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><a href="/profile/{{post.user}}">@{{post.user}}</a></h5>
+                                        <p class="card-text">{{ post.caption }}</p>
+                                        <p class="small text-muted">{{ post.created_at|date:"F d, Y" }}</p>
+                                        <a href="/#{{post.id}}" class="btn btn-primary">View Post</a>
+                                    </div>
+                                </div>
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </div>
+                    {% else %}
+                        <p>No posts found matching "{{ query }}"</p>
+                    {% endif %}
                 </div>
             </main>
         </div>

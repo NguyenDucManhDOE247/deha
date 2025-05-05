@@ -56,8 +56,6 @@
 </head>
 
 <body>
-    {% load static %}
-
     <div class="container-fluid">
         <div class="row">
             <nav class="col-md-2 d-none d-md-block sidebar" style="position: fixed;">
@@ -87,8 +85,6 @@
                             data-bs-whatever="@getbootstrap">
                             <i class="fa-solid fa-circle-plus mr-1"></i> Create Post
                         </a>
-
-
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/profile/{{user}}">
@@ -102,12 +98,12 @@
                     </li>
                 </ul>
             </nav>
-            {% load static %}
+            
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-                <!-- Your main content goes here -->
                 {% include "search.html" %}
                 {% include "profile_upload.html" %}
                 {% include "edit_profile.html" %}
+                {% include "messages.html" %}
                 <section class="gradient-custom-2">
                     <div class="container py-5">
                         <div class="row d-flex justify-content-center align-items-center h-100">
@@ -127,18 +123,11 @@
                                                 data-bs-whatever="@getbootstrap">
                                                 Edit profile
                                             </button>
-
                                             {% endif %}
-
-
-
-
                                         </div>
                                         <div class="ms-3" style="margin-top: 130px;">
                                             <h5>@{{user_profile.user}}</h5>
-
                                             <p><i class="fa-solid fa-location-dot"></i> {{user_profile.location}}</p>
-
                                         </div>
                                         <div style="margin-inline-start: auto; margin-top: auto;background:white;">
                                             <form action="/follow" method="POST">
@@ -153,7 +142,6 @@
                                                 {% endif %}
                                             </form>
                                         </div>
-
                                     </div>
                                     <div class="p-4 text-black" style="background-color: #f8f9fa;">
                                         <div class="d-flex justify-content-end text-center py-1">
@@ -177,46 +165,31 @@
                                             <div class="p-4" style="background-color: #f8f9fa;">
                                                 <p class="font-italic mb-1">{{user_profile.bio}}</p>
                                             </div>
-
                                         </div>
                                         <div class="mb-5">
                                             <p class="lead fw-normal mb-1">Photos</p>
-
-
-
                                         </div>
                                         <div class="image-grid">
                                             {% for pos in user_posts %}
                                             <div class="card image-item">
                                                 <img src="{{pos.image.url}}" class="card-img-top" alt="..."
                                                     style="width: 219px;height: 219px;">
-
                                                 <div class="card-body">
                                                     <h5 class="card-title">{{pos.caption}}</h5>
-                                                    {% if user == user_profile.user %} <a href=" /delete/{{pos.id}} "><i
-                                                            class="fa-solid fa-trash"></i></a>
-
-
+                                                    {% if user == user_profile.user %}
+                                                    <a href="/delete/{{pos.id}}"><i class="fa-solid fa-trash"></i></a>
                                                     {% endif %}
                                                 </div>
                                             </div>
-
-
                                             {% endfor %}
                                         </div>
-
-
-
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
-
-
             </main>
-
         </div>
     </div>
 

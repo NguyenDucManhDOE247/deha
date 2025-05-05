@@ -233,8 +233,8 @@ def search_results(request):
         profile = Profile.objects.create(user=request.user, id_user=request.user.id)
         profile.save()
 
-    users = Profile.objects.filter(user__username__icontains(query))
-    posts = Post.objects.filter(caption__icontains(query))
+    users = Profile.objects.filter(user__username__icontains(query)
+    posts = Post.objects.filter(caption__icontains=query)
 
     context = {
         'query': query,
@@ -267,13 +267,16 @@ def follow(request):
         follower = request.POST['follower']
         user = request.POST['user']
 
-        if Followers.objects.filter(follower=follower, user=user).first():
-            delete_follower = Followers.objects.get(follower=follower, user=user)
-            delete_follower.delete()
+        if follower == user:
             return redirect('/profile/'+user)
+
+        existing_follow = Followers.objects.filter(follower=follower, user=user).first()
+        if existing_follow:
+            existing_follow.delete()
         else:
             new_follower = Followers.objects.create(follower=follower, user=user)
             new_follower.save()
-            return redirect('/profile/'+user)
+
+        return redirect('/profile/'+user)
     else:
         return redirect('/')

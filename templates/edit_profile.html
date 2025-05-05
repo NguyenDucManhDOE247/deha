@@ -7,32 +7,42 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
-                <form  method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
                         <img src="{% static 'css/upload.png' %}" alt="" class="m-1">
-                        
-                        <label for="recipient-name" class="col-form-label">Photo</label>
-                        <input type="file" name="image" class="form-control" id="recipient-name">
-
+                        <label for="{{ form.profileimg.id_for_label }}" class="col-form-label">Photo</label>
+                        {{ form.profileimg }}
+                        {% if form.profileimg.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.profileimg.errors }}
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
-                        <label for="message-text" class="col-form-label">Bio</label>
-                        <textarea class="form-control" name="bio" placeholder="Bio..."
-                            id="message-text">{{user_profile.bio}}</textarea>
+                        <label for="{{ form.bio.id_for_label }}" class="col-form-label">Bio</label>
+                        {{ form.bio }}
+                        {% if form.bio.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.bio.errors }}
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
-                        <label for="recipient-name" class="col-form-label">Location</label>
-                        <input type="text" class="form-control" name="location" id="recipient-name" value="{{user_profile.location}}">
+                        <label for="{{ form.location.id_for_label }}" class="col-form-label">Location</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.location.errors }}
+                        </div>
+                        {% endif %}
                     </div>
-
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </div>
+                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Update Profile</button>
-            </div>
-            </form>
         </div>
     </div>
 </div>

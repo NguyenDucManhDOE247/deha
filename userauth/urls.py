@@ -6,9 +6,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('',views.home),
-    path('loginn/',views.loginn),
+    path('login/',views.login),
     path('signup/',views.signup),
-    path('logoutt/',views.logoutt),
+    path('logout/',views.logout_view),
     path('upload',views.upload),
     path('like-post/<str:id>', views.likes, name='like-post'),
     path('#<str:id>', views.home_post),

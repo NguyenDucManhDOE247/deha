@@ -234,7 +234,7 @@ def search_results(request):
         profile.save()
 
     users = Profile.objects.filter(user__username__icontains=query)
-    posts = Post.objects.filter(caption__icontains(query)
+    posts = Post.objects.filter(caption__icontains=query)
 
     context = {
         'query': query,

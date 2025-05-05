@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Q, Prefetch, Count
+from django.core.paginator import Paginator
 import logging
 from django.contrib import messages
 from . models import Followers, LikePost, Post, Profile
@@ -81,17 +82,30 @@ def logout_view(request):
 @login_required(login_url='/login')
 def home(request):
     try:
+        # Lấy hoặc tạo profile cho user hiện tại
         profile = Profile.objects.get(user=request.user)
     except Profile.DoesNotExist:
         profile = Profile.objects.create(user=request.user, id_user=request.user.id)
         profile.save()
     
+    # Lấy danh sách người đang follow
     following_users = Followers.objects.filter(follower=request.user.username).values_list('user', flat=True)
-    post = Post.objects.filter(Q(user=request.user.username) | Q(user__in=following_users)).order_by('-created_at')
+    
+    # Lấy tất cả bài post của user và người follow
+    # Đã bỏ prefetch_related không hợp lệ
+    post = Post.objects.filter(
+        Q(user=request.user.username) | Q(user__in=following_users)
+    ).order_by('-created_at')
+    
+    # Áp dụng phân trang để cải thiện hiệu suất
+    paginator = Paginator(post, 10)  # 10 bài viết mỗi trang
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        'post': post,
+        'post': page_obj,
         'profile': profile,
+        'page_obj': page_obj,
     }
     return render(request, 'main.html', context)
     
@@ -122,6 +136,7 @@ def likes(request, id):
     if request.method == 'GET':
         try:
             username = request.user.username
+            # Sử dụng get_object_or_404 để tối ưu truy vấn
             post = get_object_or_404(Post, id=id)
 
             like_filter = LikePost.objects.filter(post_id=id, username=username).first()
@@ -146,7 +161,14 @@ def likes(request, id):
 @login_required(login_url='/login')
 def explore(request):
     try:
+        # Lấy tất cả bài post và áp dụng phân trang
+        # Đã bỏ prefetch_related không hợp lệ
         post = Post.objects.all().order_by('-created_at')
+        
+        # Áp dụng phân trang
+        paginator = Paginator(post, 12)  # 12 bài viết mỗi trang
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         
         try:
             profile = Profile.objects.get(user=request.user)
@@ -155,8 +177,9 @@ def explore(request):
             profile.save()
 
         context = {
-            'post': post,
-            'profile': profile
+            'post': page_obj,
+            'profile': profile,
+            'page_obj': page_obj,
         }
         return render(request, 'explore.html', context)
     except Exception as e:
@@ -167,46 +190,60 @@ def explore(request):
 @login_required(login_url='/login')
 def profile(request, id_user):
     try:
+        # Lấy thông tin user
         user_object = User.objects.get(username=id_user)
         
+        # Lấy profile của user hiện tại
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
             profile = Profile.objects.create(user=request.user, id_user=request.user.id)
             profile.save()
         
+        # Lấy profile của user đang xem
         try:
             user_profile = Profile.objects.get(user=user_object)
         except Profile.DoesNotExist:
             user_profile = Profile.objects.create(user=user_object, id_user=user_object.id)
             user_profile.save()
         
+        # Lấy posts của user với tối ưu prefetch_related
+        # Đã bỏ prefetch_related không hợp lệ
         user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
-        user_post_length = len(user_posts)
+        
+        # Phân trang cho bài post
+        paginator = Paginator(user_posts, 9)  # 9 posts trên mỗi trang profile
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        user_post_length = user_posts.count()  # Sử dụng count() thay vì len() để tránh tải tất cả records
 
         follower = request.user.username
         user = id_user
         
-        if Followers.objects.filter(follower=follower, user=user).first():
+        # Kiểm tra trạng thái follow
+        if Followers.objects.filter(follower=follower, user=user).exists():
             follow_unfollow = 'Unfollow'
         else:
             follow_unfollow = 'Follow'
 
-        user_followers = len(Followers.objects.filter(user=id_user))
-        user_following = len(Followers.objects.filter(follower=id_user))
+        # Sử dụng count() thay vì len() để tối ưu
+        user_followers = Followers.objects.filter(user=id_user).count()
+        user_following = Followers.objects.filter(follower=id_user).count()
 
         context = {
             'user_object': user_object,
             'user_profile': user_profile,
-            'user_posts': user_posts,
+            'user_posts': page_obj,  # Đã phân trang
             'user_post_length': user_post_length,
             'profile': profile,
             'follow_unfollow': follow_unfollow,
             'user_followers': user_followers,
             'user_following': user_following,
+            'page_obj': page_obj,
         }
         
-        # Handle profile update
+        # Xử lý cập nhật profile
         if request.user.username == id_user:
             if request.method == 'POST':
                 form = ProfileForm(request.POST, request.FILES, instance=user_profile)
@@ -255,24 +292,36 @@ def search_results(request):
     try:
         query = request.GET.get('q', '')
         
+        # Lấy profile hiện tại một cách hiệu quả
         try:
-            profile = Profile.objects.filter(user=request.user).first()
-            if not profile:
-                profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-                profile.save()
-        except Exception as e:
-            logger.error(f"Error creating profile in search: {e}")
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
             profile = Profile.objects.create(user=request.user, id_user=request.user.id)
             profile.save()
 
-        users = Profile.objects.filter(user__username__icontains=query)
+        # Tối ưu truy vấn với select_related
+        users = Profile.objects.filter(user__username__icontains=query).select_related('user')
+        
+        # Tối ưu truy vấn cho posts
+        # Đã bỏ prefetch_related không hợp lệ
         posts = Post.objects.filter(caption__icontains=query)
+        
+        # Áp dụng phân trang cho kết quả
+        posts_paginator = Paginator(posts, 6)
+        posts_page = request.GET.get('posts_page')
+        posts_page_obj = posts_paginator.get_page(posts_page)
+        
+        users_paginator = Paginator(users, 10)
+        users_page = request.GET.get('users_page')
+        users_page_obj = users_paginator.get_page(users_page)
 
         context = {
             'query': query,
-            'users': users,
-            'posts': posts,
-            'profile': profile
+            'users': users_page_obj,
+            'posts': posts_page_obj,
+            'profile': profile,
+            'users_page_obj': users_page_obj,
+            'posts_page_obj': posts_page_obj,
         }
         return render(request, 'search_user.html', context)
     except Exception as e:
@@ -283,16 +332,20 @@ def search_results(request):
 @login_required(login_url='/login')
 def home_post(request, id):
     try:
-        post = Post.objects.get(id=id)
+        # Lấy một post cụ thể 
+        # Đã bỏ prefetch_related không hợp lệ
+        post = Post.objects.filter(id=id).first()
+        
+        if not post:
+            messages.error(request, "Post not found")
+            return redirect('/')
+            
         profile = Profile.objects.get(user=request.user)
         context = {
-            'post': post,
+            'post': [post],  # Đặt trong list để tương thích với template
             'profile': profile
         }
         return render(request, 'main.html', context)
-    except Post.DoesNotExist:
-        messages.error(request, "Post not found")
-        return redirect('/')
     except Profile.DoesNotExist:
         profile = Profile.objects.create(user=request.user, id_user=request.user.id)
         profile.save()
@@ -314,13 +367,12 @@ def follow(request):
                 messages.error(request, "You cannot follow yourself")
                 return redirect('/profile/'+user)
 
-            existing_follow = Followers.objects.filter(follower=follower, user=user).first()
-            if existing_follow:
+            # Sử dụng get_or_create để tránh race condition và tối ưu truy vấn
+            existing_follow, created = Followers.objects.get_or_create(follower=follower, user=user)
+            if not created:
                 existing_follow.delete()
                 messages.info(request, f"Unfollowed @{user}")
             else:
-                new_follower = Followers.objects.create(follower=follower, user=user)
-                new_follower.save()
                 messages.success(request, f"Now following @{user}")
 
             return redirect('/profile/'+user)

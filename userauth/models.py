@@ -33,9 +33,15 @@ class LikePost(models.Model):
     def __str__(self):
         return self.username
 
+
 class Followers(models.Model):
     follower = models.CharField(max_length=100)
     user = models.CharField(max_length=100)
 
     def __str__(self):
         return self.user
+        
+    class Meta:
+        verbose_name = 'Follower'
+        verbose_name_plural = 'Followers'
+        unique_together = ('follower', 'user')

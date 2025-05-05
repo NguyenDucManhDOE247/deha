@@ -224,8 +224,12 @@ def search_results(request):
     query = request.GET.get('q')
     
     try:
-        profile = Profile.objects.get(user=request.user)
-    except Profile.DoesNotExist:
+        profile = Profile.objects.filter(user=request.user).first()
+        if not profile:
+            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            profile.save()
+    except Exception as e:
+        print(f"Error: {e}")
         profile = Profile.objects.create(user=request.user, id_user=request.user.id)
         profile.save()
 

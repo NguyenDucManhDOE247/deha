@@ -38,13 +38,11 @@ class FollowersAdmin(admin.ModelAdmin):
     search_fields = ('follower', 'user')
     list_filter = ('follower', 'user')
 
-# Register models with custom admin classes
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(LikePost, LikePostAdmin)
 admin.site.register(Followers, FollowersAdmin)
 
-# Fix model verbose names
 admin.site.site_header = "Social Media Administration"
 admin.site.site_title = "Social Media Admin Portal"
 admin.site.index_title = "Welcome to Social Media Admin Portal"

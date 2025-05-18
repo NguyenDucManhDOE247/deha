@@ -1,0 +1,40 @@
+# Tạo môi trường ảo mới
+python -m venv venv
+
+# Kích hoạt môi trường ảo
+# Trên Windows:
+venv\Scripts\activate
+
+# Cài đặt Django và các thư viện phụ thuộc
+pip install django pillow python-dotenv
+
+# Tạo file .env từ .env.example
+copy .env.example .env
+
+# Hoặc tạo mới với nội dung
+echo SECRET_KEY=django-insecure-your-secret-key-here > .env
+echo DEBUG=True >> .env
+
+# Tạo lại migration cho ứng dụng userauth
+python manage.py makemigrations userauth
+
+# Áp dụng migration để tạo cơ sở dữ liệu
+python manage.py migrate
+
+# Tạo tài khoản admin
+python manage.py createsuperuser
+
+Nhập thông tin khi được yêu cầu:
+Username: (tùy chọn của bạn)
+Email: (địa chỉ email của bạn)
+Password: (mật khẩu có ít nhất 8 ký tự, bao gồm chữ và số)
+
+# Chạy server phát triển
+python manage.py runserver
+
+Mở trình duyệt và truy cập:
+Trang chủ: http://127.0.0.1:8000/
+Trang đăng nhập: http://127.0.0.1:8000/login/
+Trang đăng ký: http://127.0.0.1:8000/signup/
+Trang admin: http://127.0.0.1:8000/admin/
+

@@ -90,6 +90,12 @@ def home(request):
         Q(user=request.user.username) | Q(user__in=following_users)
     ).order_by('-created_at')
     
+    all_profiles = Profile.objects.select_related('user').all()
+    
+    username_profile_map = {}
+    for prof in all_profiles:
+        username_profile_map[prof.user.username] = prof
+    
     paginator = Paginator(post, 10)  
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -98,6 +104,9 @@ def home(request):
         'post': page_obj,
         'profile': profile,
         'page_obj': page_obj,
+        'all_profiles': all_profiles,
+        'username_profile_map': username_profile_map,
+        'user': request.user.username,
     }
     return render(request, 'main.html', context)
     
@@ -152,9 +161,19 @@ def likes(request, id):
 @login_required(login_url='/login')
 def explore(request):
     try:
-        post = Post.objects.all().order_by('-created_at')
+        posts = Post.objects.all().order_by('-created_at')
         
-        paginator = Paginator(post, 12)
+        post_data = []
+        for post in posts:
+            try:
+                post_owner = User.objects.get(username=post.user)
+                post_profile = Profile.objects.get(user=post_owner)
+                post.user_profile = post_profile
+            except (User.DoesNotExist, Profile.DoesNotExist):
+                pass
+            post_data.append(post)
+            
+        paginator = Paginator(post_data, 12)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -278,7 +297,16 @@ def search_results(request):
 
         users = Profile.objects.filter(user__username__icontains=query).select_related('user')
         
-        posts = Post.objects.filter(caption__icontains=query)
+        posts_queryset = Post.objects.filter(caption__icontains=query)
+        posts = []
+        for post in posts_queryset:
+            try:
+                post_owner = User.objects.get(username=post.user)
+                post_profile = Profile.objects.get(user=post_owner)
+                post.user_profile = post_profile
+            except (User.DoesNotExist, Profile.DoesNotExist):
+                pass
+            posts.append(post)
         
         posts_paginator = Paginator(posts, 6)
         posts_page = request.GET.get('posts_page')
@@ -305,21 +333,38 @@ def search_results(request):
 @login_required(login_url='/login')
 def home_post(request, id):
     try:
-        post = Post.objects.filter(id=id).first()
+        post = get_object_or_404(Post, id=id)
         
-        if not post:
-            messages.error(request, "Post not found")
-            return redirect('/')
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            profile.save()
+        
+        try:
+            post_owner = User.objects.get(username=post.user)
+            post_owner_profile = Profile.objects.get(user=post_owner)
+            post.user_profile = post_owner_profile  
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            post_owner_profile = None
+        
+        all_profiles = Profile.objects.select_related('user').all()
+        
+        username_profile_map = {}
+        for prof in all_profiles:
+            username_profile_map[prof.user.username] = prof
             
-        profile = Profile.objects.get(user=request.user)
         context = {
             'post': [post],  
-            'profile': profile
+            'profile': profile,
+            'post_owner_profile': post_owner_profile,
+            'all_profiles': all_profiles,
+            'username_profile_map': username_profile_map,
+            'single_post_view': True  
         }
         return render(request, 'main.html', context)
-    except Profile.DoesNotExist:
-        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-        profile.save()
+    except Post.DoesNotExist:
+        messages.error(request, "Post not found")
         return redirect('/')
     except Exception as e:
         logger.error(f"Error in home_post: {e}")

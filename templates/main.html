@@ -150,7 +150,19 @@
                     <div class="col-md-8 mx-auto">
                         <div class="post-card">
                             <div class="post-header p-3">
-                                <img src="{{profile.profileimg.url}}" alt="Profile" class="rounded-circle" style="width:40px;height:40px">
+                                {% if single_post_view and post_owner_profile %}
+                                    <img src="{{post_owner_profile.profileimg.url}}" alt="Profile" class="rounded-circle" style="width:40px;height:40px">
+                                {% else %}
+                                    {% with username=pos.user %}
+                                        {% for user_profile in all_profiles %}
+                                            {% if user_profile.user.username == username %}
+                                                <img src="{{user_profile.profileimg.url}}" alt="Profile" class="rounded-circle" style="width:40px;height:40px">
+                                                {% comment %}Replace break with endfor and skip other iterations{% endcomment %}
+                                                {% else %}{% comment %}Continue loop{% endcomment %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                {% endif %}
                                 <h5><a href="/profile/{{pos.user}}" style="text-decoration: none;">@{{pos.user}}</a></h5>
                             </div>
                             

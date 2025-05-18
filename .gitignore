@@ -25,21 +25,40 @@ var/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media
+
+# Media files (user uploads)
+media/profile_images/
+media/post_images/
+# Keep blank profile picture
+!media/blank-profile-picture.png
 
 # Environment variables
 .env
+.env.example
 
-# VSCode
+# IDE specific files
 .vscode/
+.idea/
+*.sublime-*
 
-# Staticfiles
+# Collected static files
 /staticfiles/
 
 # Virtual Environment
 venv/
 ENV/
+.venv/
 
 # OS specific
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Development/testing files
+*.bak
+*.swp
+*.tmp
+*~
+.coverage
+htmlcov/
+.pytest_cache/

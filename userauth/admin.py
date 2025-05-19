@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Profile, Post, LikePost, Followers, Comment, Tag
+from .models import Profile, Post, LikePost, Followers, Comment, Tag, Bookmark
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'location', 'profile_image_display', 'id_user')
@@ -64,12 +64,22 @@ class TagAdmin(admin.ModelAdmin):
         return obj.posts.count()
     post_count.short_description = 'Number of Posts'
 
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post_link', 'created_at')
+    search_fields = ('user', 'post__id')
+    list_filter = ('created_at',)
+    
+    def post_link(self, obj):
+        return format_html('<a href="/admin/userauth/post/{}">{}</a>', obj.post.id, obj.post.id)
+    post_link.short_description = 'Post'
+
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(LikePost, LikePostAdmin)
 admin.site.register(Followers, FollowersAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Tag, TagAdmin)
+admin.site.register(Bookmark, BookmarkAdmin)
 
 admin.site.site_header = "Social Media Administration"
 admin.site.site_title = "Social Media Admin Portal"

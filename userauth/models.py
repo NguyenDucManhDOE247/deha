@@ -66,3 +66,14 @@ class Followers(models.Model):
         verbose_name = 'Follower'
         verbose_name_plural = 'Followers'
         unique_together = ('follower', 'user')
+        
+class Bookmark(models.Model):
+    user = models.CharField(max_length=100)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='bookmarks')
+    created_at = models.DateTimeField(default=datetime.now)
+    
+    class Meta:
+        unique_together = ('user', 'post')
+    
+    def __str__(self):
+        return f"{self.user} bookmarked {self.post.id}"

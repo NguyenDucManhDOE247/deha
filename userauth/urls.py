@@ -22,4 +22,6 @@ urlpatterns = [
     path('tags/', views.manage_tags, name='manage_tags'),
     path('tag/<str:tag_name>/', views.tag_posts, name='tag_posts'),
     path('tag/delete/<int:tag_id>/', views.delete_tag, name='delete_tag'),
+    path('bookmark-post/<str:id>', views.bookmark, name='bookmark-post'),
+    path('bookmarks/', views.bookmarks, name='bookmarks'),
 ]

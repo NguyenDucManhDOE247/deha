@@ -9,7 +9,7 @@ from django.db.models import Q, Prefetch, Count
 from django.core.paginator import Paginator
 import logging
 from django.contrib import messages
-from . models import Followers, LikePost, Post, Profile, Comment, Tag
+from . models import Followers, LikePost, Post, Profile, Comment, Tag, Bookmark
 from .forms import SignUpForm, LoginForm, PostForm, ProfileForm, CommentForm
 from django.views.decorators.http import require_POST
 
@@ -89,7 +89,10 @@ def home(request):
     
     post = Post.objects.filter(
         Q(user=request.user.username) | Q(user__in=following_users)
-    ).order_by('-created_at')
+    ).prefetch_related('comments', 'tags').order_by('-created_at')
+    
+    user_bookmarks = Bookmark.objects.filter(user=request.user.username).values_list('post_id', flat=True)
+    user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
     
     all_profiles = Profile.objects.select_related('user').all()
     
@@ -111,6 +114,8 @@ def home(request):
         'username_profile_map': username_profile_map,
         'user': request.user.username,
         'tag_list': tag_list,
+        'user_bookmarks': user_bookmarks,
+        'user_likes': user_likes,
     }
     return render(request, 'main.html', context)
     
@@ -164,6 +169,8 @@ def likes(request, id):
                 return redirect(f'/tag/{tag_name}/')
             elif '/post/' in referer:
                 return redirect(f'/post/{id}')
+            elif '/bookmarks/' in referer:
+                return redirect(f'/bookmarks/#{id}')
             else:
                 return redirect('/#'+str(id))
         except Exception as e:
@@ -511,6 +518,9 @@ def tag_posts(request, tag_name):
         tag = get_object_or_404(Tag, name=tag_name)
         posts = tag.posts.all().order_by('-created_at')
         
+        # Get user's bookmarks
+        user_bookmarks = Bookmark.objects.filter(user=request.user.username).values_list('post_id', flat=True)
+        
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
@@ -538,6 +548,7 @@ def tag_posts(request, tag_name):
             'username_profile_map': username_profile_map,
             'user': request.user.username,
             'tag_list': tag_list,
+            'user_bookmarks': user_bookmarks,
         }
         
         return render(request, 'tag_posts.html', context)
@@ -559,3 +570,76 @@ def delete_tag(request, tag_id):
         logger.error(f"Error in delete_tag: {e}")
         messages.error(request, "An error occurred while deleting the tag")
         return redirect('/tags/')
+
+@login_required(login_url='/login')
+def bookmark(request, id):
+    if request.method == 'GET':
+        try:
+            username = request.user.username
+            post = get_object_or_404(Post, id=id)
+
+            bookmark_filter = Bookmark.objects.filter(post=post, user=username).first()
+
+            if bookmark_filter is None:
+                new_bookmark = Bookmark.objects.create(post=post, user=username)
+                messages.success(request, "Post bookmarked successfully!")
+            else:
+                bookmark_filter.delete()
+                messages.info(request, "Post removed from bookmarks")
+
+            referer = request.META.get('HTTP_REFERER', '')
+            if '/tag/' in referer:
+                tag_name = referer.split('/tag/')[1].split('/')[0]
+                return redirect(f'/tag/{tag_name}/')
+            elif '/post/' in referer:
+                return redirect(f'/post/{id}')
+            elif '/bookmarks/' in referer:
+                return redirect(f'/bookmarks/#{id}')
+            else:
+                return redirect('/#'+str(id))
+                
+        except Exception as e:
+            logger.error(f"Error in bookmark: {e}")
+            messages.error(request, "An error occurred during this operation")
+            return redirect('/')
+
+@login_required(login_url='/login')
+def bookmarks(request):
+    try:
+        user_bookmarks = Bookmark.objects.filter(user=request.user.username).order_by('-created_at')
+        bookmarked_posts = [bookmark.post for bookmark in user_bookmarks]
+        
+        user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
+        
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            profile.save()
+            
+        all_profiles = Profile.objects.select_related('user').all()
+        
+        username_profile_map = {}
+        for prof in all_profiles:
+            username_profile_map[prof.user.username] = prof
+        
+        paginator = Paginator(bookmarked_posts, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'post': page_obj,
+            'profile': profile,
+            'page_obj': page_obj,
+            'all_profiles': all_profiles,
+            'username_profile_map': username_profile_map,
+            'user': request.user.username,
+            'user_bookmarks': user_bookmarks.values_list('post_id', flat=True),
+            'user_likes': user_likes,
+        }
+        
+        return render(request, 'bookmarks.html', context)
+    except Exception as e:
+        logger.error(f"Error in bookmarks view: {e}")
+        messages.error(request, "An error occurred while loading bookmarks")
+        return redirect('/')

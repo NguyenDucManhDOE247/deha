@@ -1,6 +1,6 @@
 # Social Media Platform
 
-A Django-based social media platform with modern features including user authentication, profiles, posts, likes, follows, and content exploration.
+A modern, Django-based social media platform with features including user authentication, profiles, posts, likes, follows, comments, tags, and content exploration.
 
 ## 📋 Features
 
@@ -8,32 +8,47 @@ A Django-based social media platform with modern features including user authent
   - Secure signup/login system
   - Custom validation for usernames and passwords
   - Session management
+  - Profile-based user accounts
 
 - **Profile Management**
   - Customizable user profiles
-  - Profile pictures
-  - Bio and location information
-  - Follow/unfollow functionality
+  - Profile pictures and bio
+  - Location information
+  - Statistics for posts, followers, and following
 
-- **Content Creation**
+- **Social Interaction**
+  - Follow/unfollow functionality
+  - Real-time follower statistics
+  - Activity tracking
+
+- **Content Creation & Management**
   - Image-based posts with captions
   - Like/unlike functionality
+  - Comment system
   - Post deletion (for owned content)
+  - Tag management for content organization
+
+- **Content Organization**
+  - Post tagging system
+  - Tag management interface
+  - Bookmark system for saving posts
 
 - **Content Discovery**
   - Home feed with posts from followed users
   - Explore page for discovering new content
-  - User and post search functionality
+  - Tag-based content filtering
+  - Advanced user and post search functionality
 
 - **Responsive Design**
-  - Bootstrap-based UI
+  - Bootstrap 5-based UI
   - Mobile-friendly layout
+  - Intuitive user interface
 
 ## 🛠️ Technologies
 
 - **Backend**
   - Django 5.2
-  - Python 3.x
+  - Python 3.8+
   - SQLite (development)
 
 - **Frontend**
@@ -41,10 +56,16 @@ A Django-based social media platform with modern features including user authent
   - CSS3
   - JavaScript
   - Bootstrap 5
-  - Font Awesome
+  - Font Awesome 6
 
-- **File Storage**
+- **File Storage & Media**
   - Django's media handling for user uploads
+  - Image processing with Pillow
+
+- **Development Tools**
+  - Environment variable management with python-dotenv
+  - Comprehensive logging system
+  - Custom template tags
 
 ## 🚀 Getting Started
 
@@ -52,6 +73,7 @@ A Django-based social media platform with modern features including user authent
 
 - Python 3.8 or higher
 - pip (Python package manager)
+- Git (optional, for cloning)
 
 ### Installation
 
@@ -111,6 +133,31 @@ A Django-based social media platform with modern features including user authent
    - Web interface: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
    - Admin panel: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
 
+## 📱 Key Features & Pages
+
+### User Management
+- **Sign Up**: Create a new account with username, email, and password
+- **Login**: Secure authentication system
+- **Profile Management**: Update profile picture, bio, and location
+
+### Content Interaction
+- **Home Feed**: View posts from users you follow
+- **Explore**: Discover new content from all users
+- **Post Detail**: View individual posts with comments
+- **Like/Unlike**: Interact with posts
+- **Comments**: Add and delete comments on posts
+- **Bookmark**: Save posts for later viewing
+
+### Content Organization
+- **Tags**: Categorize posts with custom tags
+- **Tag Management**: Create, view, and delete tags
+- **Tag Filtering**: View posts by specific tags
+
+### User Interaction
+- **Follow/Unfollow**: Connect with other users
+- **Search**: Find users or posts by keywords
+- **User Profiles**: View other users' content and stats
+
 ## 📁 Project Structure
 
 ```
@@ -124,22 +171,32 @@ socialmedia/
 │
 ├── userauth/             # Main application
 │   ├── migrations/       # Database migrations
-│   ├── models.py         # Data models
+│   ├── models.py         # Data models (Profile, Post, Comment, etc.)
 │   ├── views.py          # View logic
-│   ├── forms.py          # Form handling
+│   ├── forms.py          # Form handling (SignUp, Login, Post, etc.)
 │   ├── urls.py           # URL routing
-│   └── admin.py          # Admin interface configuration
+│   ├── admin.py          # Admin interface configuration
+│   ├── templatetags/     # Custom template tags
+│   └── context_processors.py # Global context processors
 │
 ├── templates/            # HTML templates
+│   ├── base.html         # Base template with common elements
 │   ├── main.html         # Home page
 │   ├── profile.html      # User profile page
 │   ├── explore.html      # Explore page
 │   ├── login.html        # Login page
-│   └── signup.html       # Registration page
+│   ├── signup.html       # Registration page
+│   ├── bookmarks.html    # Bookmarked posts page
+│   ├── tag_posts.html    # Posts filtered by tag
+│   ├── search_user.html  # Search results page
+│   ├── comments.html     # Comments component
+│   ├── modal.html        # Post creation modal
+│   └── messages.html     # Flash messages component
 │
 ├── static/               # Static files
 │   ├── css/              # CSS styles
-│   └── js/               # JavaScript files
+│   ├── js/               # JavaScript files
+│   └── ico/              # Favicon and icons
 │
 ├── media/                # User-uploaded content
 │   ├── profile_images/   # Profile pictures
@@ -147,8 +204,19 @@ socialmedia/
 │
 ├── manage.py             # Django management script
 ├── .env                  # Environment variables
-└── .env.example          # Example environment variables
+├── .env.example          # Example environment variables
+└── README.md             # Project documentation
 ```
+
+## 🔄 Database Models
+
+- **Profile**: User profile information
+- **Post**: User-created content with images and captions
+- **Comment**: Comments on posts
+- **LikePost**: Track post likes
+- **Followers**: Track user follow relationships
+- **Tag**: Post categorization
+- **Bookmark**: Saved posts
 
 ## 👨‍💻 Development
 
@@ -170,12 +238,37 @@ socialmedia/
 - Include docstrings for functions and classes
 - Write unit tests for new functionality
 
-## 🔒 Security
+## 🔒 Security Features
 
 - Passwords are hashed using Django's authentication system
 - CSRF protection enabled
-- Form validation for user inputs
+- Form validation with custom validators
 - Environment variables for sensitive settings
+- Session management
+- Secure permission checks for content manipulation
+
+## ⚙️ Configuration
+
+The project uses environment variables for configuration:
+
+- `SECRET_KEY`: Django's secret key for cryptographic signing
+- `DEBUG`: Toggle debug mode (True/False)
+
+In production, additional security settings are automatically enabled:
+- Session and CSRF cookie security
+- SSL/HTTPS enforcement
+- HTTP Strict Transport Security
+
+## 🚀 Deployment Considerations
+
+For production deployment:
+
+1. Set `DEBUG=False` in your environment
+2. Configure a production database (PostgreSQL recommended)
+3. Set up proper static file serving
+4. Use a WSGI server like Gunicorn or uWSGI
+5. Configure a reverse proxy like Nginx
+6. Set up proper media file storage (AWS S3, etc.)
 
 ## 🤝 Contributing
 
@@ -196,8 +289,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Django](https://www.djangoproject.com/)
 - [Bootstrap](https://getbootstrap.com/)
 - [Font Awesome](https://fontawesome.com/)
+- [Pillow](https://python-pillow.org/)
 - All contributors who have helped shape this project
 
 ---
 
-Developed with ❤️ 
+Developed with ❤️ by X

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
-from .models import Profile, Post, Comment
+from .models import Profile, Post, Comment, Tag
 
 username_validator = RegexValidator(
     r'^[a-zA-Z0-9._]{3,}$',
@@ -70,9 +70,18 @@ class LoginForm(forms.Form):
     )
 
 class PostForm(forms.ModelForm):
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-control',
+            'size': '3'  
+        }),
+        required=False
+    )
+    
     class Meta:
         model = Post
-        fields = ['image', 'caption']
+        fields = ['image', 'caption', 'tags']
         widgets = {
             'caption': forms.Textarea(attrs={
                 'class': 'form-control',

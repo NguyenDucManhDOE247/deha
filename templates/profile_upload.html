@@ -20,6 +20,15 @@
                         <label for="id_caption" class="col-form-label">Caption</label>
                         <textarea class="form-control" name="caption" placeholder="Caption..." id="id_caption"></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label for="id_tags" class="col-form-label">Tags</label>
+                        <select multiple class="form-control" name="tags" id="id_tags">
+                            {% for tag in tag_list %}
+                                <option value="{{ tag.id }}">{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple tags</small>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Create Post</button>

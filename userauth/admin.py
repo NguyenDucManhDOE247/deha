@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Profile, Post, LikePost, Followers, Comment
+from .models import Profile, Post, LikePost, Followers, Comment, Tag
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'location', 'profile_image_display', 'id_user')
@@ -14,9 +14,10 @@ class ProfileAdmin(admin.ModelAdmin):
     profile_image_display.short_description = 'Profile Image'
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('user', 'caption_preview', 'post_image_display', 'created_at', 'no_of_likes')
-    list_filter = ('created_at',)
+    list_display = ('user', 'caption_preview', 'post_image_display', 'created_at', 'no_of_likes', 'tag_list')
+    list_filter = ('created_at', 'tags')
     search_fields = ('user', 'caption')
+    filter_horizontal = ('tags',)
     
     def caption_preview(self, obj):
         return obj.caption[:50] + "..." if len(obj.caption) > 50 else obj.caption
@@ -27,6 +28,10 @@ class PostAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" width="50" height="50" />', obj.image.url)
         return "No Image"
     post_image_display.short_description = 'Image'
+    
+    def tag_list(self, obj):
+        return ", ".join([tag.name for tag in obj.tags.all()])
+    tag_list.short_description = 'Tags'
 
 class LikePostAdmin(admin.ModelAdmin):
     list_display = ('username', 'post_id')
@@ -51,11 +56,20 @@ class CommentAdmin(admin.ModelAdmin):
         return format_html('<a href="/admin/userauth/post/{}">{}</a>', obj.post.id, obj.post.id)
     post_link.short_description = 'Post'
 
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'post_count')
+    search_fields = ('name',)
+    
+    def post_count(self, obj):
+        return obj.posts.count()
+    post_count.short_description = 'Number of Posts'
+
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(LikePost, LikePostAdmin)
 admin.site.register(Followers, FollowersAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(Tag, TagAdmin)
 
 admin.site.site_header = "Social Media Administration"
 admin.site.site_title = "Social Media Admin Portal"

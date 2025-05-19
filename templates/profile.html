@@ -46,7 +46,6 @@
 
         .image-item:hover {
             border: 1px solid #777;
-
         }
 
         .image-item img {
@@ -95,6 +94,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">
                             <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tags">
+                            <i class="fa-solid fa-tags mr-1"></i> Manage Tags
                         </a>
                     </li>
                 </ul>
@@ -177,6 +181,13 @@
                                                     style="width: 219px;height: 219px;">
                                                 <div class="card-body">
                                                     <h5 class="card-title">{{pos.caption}}</h5>
+                                                    <div class="post-tags mb-2">
+                                                        {% for tag in pos.tags.all %}
+                                                        <a href="/tag/{{ tag.name }}" class="badge bg-light text-dark text-decoration-none">
+                                                            <i class="fas fa-tag me-1"></i>{{ tag.name }}
+                                                        </a>
+                                                        {% endfor %}
+                                                    </div>
                                                     {% if user == user_profile.user %}
                                                     <a href="/delete/{{pos.id}}"><i class="fa-solid fa-trash"></i></a>
                                                     {% endif %}

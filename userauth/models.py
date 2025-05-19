@@ -15,6 +15,15 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.CharField(max_length=100)
@@ -22,6 +31,7 @@ class Post(models.Model):
     caption = models.TextField()
     created_at = models.DateTimeField(default=datetime.now)
     no_of_likes = models.IntegerField(default=0)
+    tags = models.ManyToManyField(Tag, blank=True, related_name='posts')
 
     def __str__(self):
         return self.user

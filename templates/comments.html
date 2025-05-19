@@ -19,7 +19,6 @@
                                 {% for user_profile in all_profiles %}
                                     {% if user_profile.user.username == username %}
                                         <img src="{{ user_profile.profileimg.url }}" alt="Profile" class="rounded-circle me-2" style="width:30px;height:30px">
-                                        {% comment %}Replace break with endfor and skip other iterations{% endcomment %}
                                     {% endif %}
                                 {% endfor %}
                             {% endwith %}

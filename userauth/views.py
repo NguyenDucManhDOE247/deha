@@ -9,7 +9,7 @@ from django.db.models import Q, Prefetch, Count
 from django.core.paginator import Paginator
 import logging
 from django.contrib import messages
-from . models import Followers, LikePost, Post, Profile, Comment
+from . models import Followers, LikePost, Post, Profile, Comment, Tag
 from .forms import SignUpForm, LoginForm, PostForm, ProfileForm, CommentForm
 from django.views.decorators.http import require_POST
 
@@ -101,6 +101,8 @@ def home(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    tag_list = Tag.objects.all().order_by('name')
+    
     context = {
         'post': page_obj,
         'profile': profile,
@@ -108,6 +110,7 @@ def home(request):
         'all_profiles': all_profiles,
         'username_profile_map': username_profile_map,
         'user': request.user.username,
+        'tag_list': tag_list,
     }
     return render(request, 'main.html', context)
     
@@ -121,6 +124,8 @@ def upload(request):
                 post = form.save(commit=False)
                 post.user = request.user.username
                 post.save()
+                
+                form.save_m2m()
                 
                 messages.success(request, "Post created successfully!")
                 return redirect('/')
@@ -153,7 +158,14 @@ def likes(request, id):
 
             post.save()
 
-            return redirect('/#'+str(id))
+            referer = request.META.get('HTTP_REFERER', '')
+            if '/tag/' in referer:
+                tag_name = referer.split('/tag/')[1].split('/')[0]
+                return redirect(f'/tag/{tag_name}/')
+            elif '/post/' in referer:
+                return redirect(f'/post/{id}')
+            else:
+                return redirect('/#'+str(id))
         except Exception as e:
             logger.error(f"Error in likes: {e}")
             messages.error(request, "An error occurred during this operation")
@@ -464,3 +476,86 @@ def delete_comment(request, comment_id):
         logger.error(f"Error in delete_comment: {e}")
         messages.error(request, "An error occurred while deleting the comment")
         return redirect('/')
+
+@login_required(login_url='/login')
+def manage_tags(request):
+    if request.method == 'POST':
+        tag_name = request.POST.get('tag_name', '').strip()
+        if tag_name:
+            tag, created = Tag.objects.get_or_create(name=tag_name.lower())
+            if created:
+                messages.success(request, f"Tag '{tag_name}' created successfully!")
+            else:
+                messages.info(request, f"Tag '{tag_name}' already exists.")
+        else:
+            messages.error(request, "Tag name cannot be empty.")
+            
+    tags = Tag.objects.all().order_by('name')
+    
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+        profile.save()
+    
+    context = {
+        'tags': tags,
+        'profile': profile,
+    }
+    
+    return render(request, 'manage_tags.html', context)
+
+@login_required(login_url='/login')
+def tag_posts(request, tag_name):
+    try:
+        tag = get_object_or_404(Tag, name=tag_name)
+        posts = tag.posts.all().order_by('-created_at')
+        
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            profile.save()
+            
+        all_profiles = Profile.objects.select_related('user').all()
+        
+        username_profile_map = {}
+        for prof in all_profiles:
+            username_profile_map[prof.user.username] = prof
+        
+        paginator = Paginator(posts, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        tag_list = Tag.objects.all().order_by('name')
+        
+        context = {
+            'tag': tag,
+            'post': page_obj,
+            'profile': profile,
+            'page_obj': page_obj,
+            'all_profiles': all_profiles,
+            'username_profile_map': username_profile_map,
+            'user': request.user.username,
+            'tag_list': tag_list,
+        }
+        
+        return render(request, 'tag_posts.html', context)
+    except Exception as e:
+        logger.error(f"Error in tag_posts: {e}")
+        messages.error(request, "An error occurred while loading posts")
+        return redirect('/')
+
+@login_required(login_url='/login')
+def delete_tag(request, tag_id):
+    try:
+        tag = get_object_or_404(Tag, id=tag_id)
+        
+        tag_name = tag.name
+        tag.delete()
+        messages.success(request, f"Tag '{tag_name}' deleted successfully!")
+        return redirect('/tags/')
+    except Exception as e:
+        logger.error(f"Error in delete_tag: {e}")
+        messages.error(request, "An error occurred while deleting the tag")
+        return redirect('/tags/')

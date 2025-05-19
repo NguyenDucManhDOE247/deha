@@ -15,84 +15,6 @@
 
     <title>Social Media</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <style>
-        .sidebar {
-            background-color: #f8f9fa;
-            height: 100vh;
-            color: black;
-            position: fixed;
-            width: 16.666667%;
-            padding-right: 15px;
-            overflow-y: auto;
-        }
-
-        .main-content {
-            margin-left: 16.666667%;
-            padding: 20px;
-        }
-
-        .profile-pic {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        a {
-            color: black;
-        }
-
-        .post-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .post-image-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            max-height: 500px;
-            background-color: #f8f9fa;
-        }
-
-        .post-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .post-content {
-            padding: 15px;
-        }
-
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .post-header h5 {
-            margin: 0;
-            margin-left: 10px;
-        }
-
-        .post-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-top: 1px solid #eee;
-        }
-
-        .like-count {
-            margin: 0;
-            font-size: 14px;
-        }
-    </style>
 </head>
 
 <body>
@@ -100,50 +22,50 @@
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-2 sidebar">
-            <div class="text-center mt-3">
+            <div class="sidebar-header">
                 <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
-                <h4 class="mt-2"><a href="/profile/{{user}}" style="text-decoration:none;">@{{user}}</a></h4>
+                <h4 class="mt-2"><a href="/profile/{{user}}">@{{user}}</a></h4>
             </div>
             <ul class="nav flex-column mt-4">
                 <li class="nav-item">
                     <a class="nav-link active" href="/">
-                        <i class="fa-solid fa-house mr-1"></i> Home
+                        <i class="fa-solid fa-house"></i> Home
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/explore">
-                        <i class="fa-solid fa-compass mr-1"></i> Explore
+                        <i class="fa-solid fa-compass"></i> Explore
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal3">
-                        <i class="fa-solid fa-magnifying-glass mr-1"></i> Search
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal"
                         data-bs-whatever="@getbootstrap">
-                        <i class="fa-solid fa-circle-plus mr-1"></i> Create Post
+                        <i class="fa-solid fa-circle-plus"></i> Create Post
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/profile/{{user}}">
-                        <i class="fa-solid fa-user mr-1"></i> Profile
+                        <i class="fa-solid fa-user"></i> Profile
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/tags">
-                        <i class="fa-solid fa-tags mr-1"></i> Manage Tags
+                        <i class="fa-solid fa-tags"></i> Manage Tags
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/bookmarks">
-                        <i class="fa-solid fa-bookmark mr-1"></i> Bookmarks
+                        <i class="fa-solid fa-bookmark"></i> Bookmarks
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">
-                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
                     </a>
                 </li>
             </ul>
@@ -155,25 +77,25 @@
             {% include "search.html" %}
             {% include "messages.html" %}
         
-            <div>
+            <div class="fade-in">
                 {% for pos in post %}
                 <div class="row" id="{{pos.id}}">
                     <div class="col-md-8 mx-auto">
                         <div class="post-card">
-                            <div class="post-header p-3">
+                            <div class="post-header">
                                 {% if single_post_view and post_owner_profile %}
-                                    <img src="{{post_owner_profile.profileimg.url}}" alt="Profile" class="rounded-circle" style="width:40px;height:40px">
+                                    <img src="{{post_owner_profile.profileimg.url}}" alt="Profile" class="rounded-circle">
                                 {% else %}
                                     {% with username=pos.user %}
                                         {% for user_profile in all_profiles %}
                                             {% if user_profile.user.username == username %}
-                                                <img src="{{user_profile.profileimg.url}}" alt="Profile" class="rounded-circle" style="width:40px;height:40px">
+                                                <img src="{{user_profile.profileimg.url}}" alt="Profile" class="rounded-circle">
                                                 {% else %}
                                             {% endif %}
                                         {% endfor %}
                                     {% endwith %}
                                 {% endif %}
-                                <h5><a href="/profile/{{pos.user}}" style="text-decoration: none;">@{{pos.user}}</a></h5>
+                                <h5><a href="/profile/{{pos.user}}">@{{pos.user}}</a></h5>
                             </div>
                             
                             <div class="post-image-container">
@@ -182,9 +104,9 @@
                             
                             <div class="post-content">
                                 <p>{{pos.caption}}</p>
-                                <div class="post-tags mb-2">
+                                <div class="post-tags">
                                     {% for tag in pos.tags.all %}
-                                        <a href="/tag/{{ tag.name }}" class="badge bg-light text-dark text-decoration-none">
+                                        <a href="/tag/{{ tag.name }}" class="badge bg-light text-dark">
                                             <i class="fas fa-tag me-1"></i>{{ tag.name }}
                                         </a>
                                     {% endfor %}

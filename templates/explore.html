@@ -13,92 +13,6 @@
 
     <title>Explore</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar {
-            background-color: #f8f9fa;
-            height: 100vh;
-            color: black;
-            position: fixed;
-            width: 16.666667%;
-            padding-right: 15px;
-            overflow-y: auto;
-        }
-
-        .profile-pic {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        a {
-            color: black;
-        }
-
-        .main-content {
-            margin-left: 16.666667%;
-            padding: 20px;
-        }
-
-        .post-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 15px;
-        }
-
-        .post-item {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            aspect-ratio: 1/1;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .post-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .post-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            padding: 10px;
-        }
-
-        .post-item:hover .post-overlay {
-            opacity: 1;
-        }
-
-        .post-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .post-description {
-            font-size: 0.9rem;
-            text-align: center;
-        }
-    </style>
 </head>
 
 <body>
@@ -106,45 +20,50 @@
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
-                <div class="text-center mt-3">
+                <div class="sidebar-header">
                     <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
-                    <h4 class="mt-2"><a href="/profile/{{profile.user.username}}" style="text-decoration:none;">@{{profile.user.username}}</a></h4>
+                    <h4 class="mt-2"><a href="/profile/{{profile.user.username}}">@{{profile.user.username}}</a></h4>
                 </div>
                 <ul class="nav flex-column mt-4">
                     <li class="nav-item">
                         <a class="nav-link" href="/">
-                            <i class="fa-solid fa-house mr-1"></i> Home
+                            <i class="fa-solid fa-house"></i> Home
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="/explore">
-                            <i class="fa-solid fa-compass mr-1"></i> Explore
+                            <i class="fa-solid fa-compass"></i> Explore
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal3">
-                            <i class="fa-solid fa-magnifying-glass mr-1"></i> Search
+                            <i class="fa-solid fa-magnifying-glass"></i> Search
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal"
                             data-bs-whatever="@getbootstrap">
-                            <i class="fa-solid fa-circle-plus mr-1"></i> Create Post
+                            <i class="fa-solid fa-circle-plus"></i> Create Post
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/profile/{{profile.user.username}}">
-                            <i class="fa-solid fa-user mr-1"></i> Profile
+                            <i class="fa-solid fa-user"></i> Profile
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">
-                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                        <a class="nav-link" href="/tags">
+                            <i class="fa-solid fa-tags"></i> Manage Tags
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/bookmarks">
-                            <i class="fa-solid fa-bookmark mr-1"></i> Bookmarks
+                            <i class="fa-solid fa-bookmark"></i> Bookmarks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
                     </li>
                 </ul>
@@ -156,16 +75,16 @@
                 {% include "search.html" %}
                 {% include "messages.html" %}
 
-                <h2 class="mb-4">Explore Posts</h2>
+                <h2 class="mb-4 fade-in">Explore Posts</h2>
 
-                <div class="row mb-4">
+                <div class="row mb-4 fade-in">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0">Explore by Tags</h5>
                             </div>
                             <div class="card-body">
-                                <div class="d-flex flex-wrap gap-2">
+                                <div class="tags-list">
                                     {% for tag in tag_list %}
                                     <a href="/tag/{{ tag.name }}/" class="text-decoration-none">
                                         <span class="badge {% if tag.name == active_tag %}bg-primary{% else %}{% if tag.posts.count > 0 %}bg-success{% else %}bg-light text-dark{% endif %}{% endif %} mb-2">
@@ -186,14 +105,15 @@
                     </div>
                 </div>
 
-                <div class="post-grid">
+                <div class="post-grid fade-in">
                     {% for pos in post %}
-                    <div class="post-item">
-                        <img class="post-image" src="{{pos.image.url}}" alt="Post Image">
-                        <div class="post-overlay">
-                            <div class="post-title"><a href="/profile/{{pos.user}}">@{{pos.user}}</a></div>
-                            <p class="post-description">
-                                {{pos.caption}}
+                    <div class="post-grid-item">
+                        <img class="post-grid-image" src="{{pos.image.url}}" alt="Post Image">
+                        <div class="post-grid-overlay">
+                            <div class="post-title"><a href="/profile/{{pos.user}}" class="text-light">@{{pos.user}}</a>
+                            </div>
+                            <p class="post-description text-light">
+                                {{pos.caption|truncatechars:50}}
                             </p>
                             <div class="mt-1 mb-2">
                                 {% for tag in pos.tags.all %}
@@ -202,7 +122,11 @@
                                 </span>
                                 {% endfor %}
                             </div>
-                            <a href="/post/{{pos.id}}" class="btn btn-sm btn-primary mt-2">View Post</a>
+                            <div class="post-grid-overlay-stats">
+                                <span><i class="fas fa-heart"></i> {{pos.no_of_likes}}</span>
+                                <span><i class="fas fa-comment"></i> {{pos.comments.count}}</span>
+                            </div>
+                            <a href="/post/{{pos.id}}" class="btn btn-sm btn-light mt-3">View Post</a>
                         </div>
                     </div>
                     {% endfor %}

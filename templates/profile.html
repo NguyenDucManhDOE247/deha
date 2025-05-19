@@ -14,146 +14,111 @@
 
     <title>{{user_profile.user}}</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <style>
-        /* Custom styles for the sidebar */
-        .sidebar {
-            background-color: #f8f9fa;
-            height: 100vh;
-            color: black;
-        }
-
-        .profile-pic {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        a {
-            color: black;
-        }
-
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-        }
-
-        .image-item {
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-
-        .image-item:hover {
-            border: 1px solid #777;
-        }
-
-        .image-item img {
-            max-width: 100%;
-            height: auto;
-        }
-    </style>
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-2 d-none d-md-block sidebar" style="position: fixed;">
-                <div class="text-center mt-3">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <div class="sidebar-header">
                     <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
-                    <h4 class="mt-2"><a href="/profile/{{user}}" style="text-decoration:none;">@{{user}}</a></h4>
+                    <h4 class="mt-2"><a href="/profile/{{user}}">@{{user}}</a></h4>
                 </div>
                 <ul class="nav flex-column mt-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">
-                            <i class="fa-solid fa-house mr-1"></i> Home
+                        <a class="nav-link" href="/">
+                            <i class="fa-solid fa-house"></i> Home
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/explore">
-                            <i class="fa-solid fa-compass mr-1"></i> Explore
+                            <i class="fa-solid fa-compass"></i> Explore
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal3">
-                            <i class="fa-solid fa-magnifying-glass mr-1"></i> Search
+                            <i class="fa-solid fa-magnifying-glass"></i> Search
                         </a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal2"
                             data-bs-whatever="@getbootstrap">
-                            <i class="fa-solid fa-circle-plus mr-1"></i> Create Post
+                            <i class="fa-solid fa-circle-plus"></i> Create Post
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/profile/{{user}}">
-                            <i class="fa-solid fa-user mr-1"></i> Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">
-                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                        <a class="nav-link active" href="/profile/{{user}}">
+                            <i class="fa-solid fa-user"></i> Profile
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/tags">
-                            <i class="fa-solid fa-tags mr-1"></i> Manage Tags
+                            <i class="fa-solid fa-tags"></i> Manage Tags
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/bookmarks">
-                            <i class="fa-solid fa-bookmark mr-1"></i> Bookmarks
+                            <i class="fa-solid fa-bookmark"></i> Bookmarks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
                     </li>
                 </ul>
-            </nav>
+            </div>
             
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <main role="main" class="col-md-10 main-content">
                 {% include "search.html" %}
                 {% include "profile_upload.html" %}
                 {% include "edit_profile.html" %}
                 {% include "messages.html" %}
-                <section class="gradient-custom-2">
+                
+                <section class="gradient-custom-2 fade-in">
                     <div class="container py-5">
-                        <div class="row d-flex justify-content-center align-items-center h-100">
-                            <div class="col col-lg-9 col-xl-7">
+                        <div class="row d-flex justify-content-center align-items-center">
+                            <div class="col-lg-9">
                                 <div class="card">
-                                    <div class="rounded-top text-white d-flex flex-row"
-                                        style="background:black; height:200px;">
-                                        <div class="ms-4  d-flex flex-column" style="width: 150px; margin-top:5rem;">
-                                            <img src="{{user_profile.profileimg.url}}" alt="Generic placeholder image"
-                                                class="img-fluid img-thumbnail mt-4 mb-2"
+                                    <div class="rounded-top text-white d-flex flex-row bg-dark profile-header" style="height:200px;">
+                                        <div class="ms-4 d-flex flex-column" style="width: 150px; margin-top:5rem;">
+                                            <img src="{{user_profile.profileimg.url}}" alt="Profile picture"
+                                                class="img-fluid img-thumbnail mt-4 mb-2 profile-pic"
                                                 style="width: 150px; z-index: 1">
 
                                             {% if user == user_profile.user %}
-                                            <button type="button" class="btn btn-outline-dark"
-                                                data-mdb-ripple-color="dark" style="z-index: 1; margin: 5px;"
+                                            <button type="button" class="btn btn-outline-light"
+                                                data-mdb-ripple-color="dark" style="z-index: 1;"
                                                 data-bs-toggle="modal" data-bs-target="#exampleModal1"
                                                 data-bs-whatever="@getbootstrap">
-                                                Edit profile
+                                                <i class="fas fa-edit me-1"></i> Edit profile
                                             </button>
                                             {% endif %}
                                         </div>
-                                        <div class="ms-3" style="margin-top: 130px;">
+                                        <div class="ms-3 profile-info">
                                             <h5>@{{user_profile.user}}</h5>
                                             <p><i class="fa-solid fa-location-dot"></i> {{user_profile.location}}</p>
                                         </div>
-                                        <div style="margin-inline-start: auto; margin-top: auto;background:white;">
+                                        <div class="ms-auto mb-3">
                                             <form action="/follow" method="POST">
                                                 {% csrf_token %}  
                                                 {% if user != user_profile.user %}
                                                 <input type="hidden" value="{{user.username}}" name="follower" />
                                                 <input type="hidden" value="{{user_object.username}}" name="user" />
-                                                <button type="submit" class="btn btn-outline-dark"
-                                                        data-mdb-ripple-color="dark" style="z-index: 1; margin: 5px;">
-                                                        {{follow_unfollow}}
+                                                <button type="submit" class="btn {% if follow_unfollow == 'Follow' %}btn-primary{% else %}btn-outline-light{% endif %} mt-3">
+                                                    {% if follow_unfollow == 'Follow' %}
+                                                        <i class="fas fa-user-plus me-1"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-user-minus me-1"></i>
+                                                    {% endif %}
+                                                    {{follow_unfollow}}
                                                 </button>
                                                 {% endif %}
                                             </form>
                                         </div>
                                     </div>
-                                    <div class="p-4 text-black" style="background-color: #f8f9fa;">
+                                    <div class="p-4 text-black profile-stats bg-light">
                                         <div class="d-flex justify-content-end text-center py-1">
                                             <div>
                                                 <p class="mb-1 h5">{{user_post_length}}</p>
@@ -172,20 +137,19 @@
                                     <div class="card-body p-4 text-black">
                                         <div class="mb-5">
                                             <p class="lead fw-normal mb-1">About</p>
-                                            <div class="p-4" style="background-color: #f8f9fa;">
+                                            <div class="p-4 profile-bio bg-light">
                                                 <p class="font-italic mb-1">{{user_profile.bio}}</p>
                                             </div>
                                         </div>
                                         <div class="mb-5">
                                             <p class="lead fw-normal mb-1">Photos</p>
                                         </div>
-                                        <div class="image-grid">
+                                        <div class="post-grid">
                                             {% for pos in user_posts %}
-                                            <div class="card image-item">
-                                                <img src="{{pos.image.url}}" class="card-img-top" alt="..."
-                                                    style="width: 219px;height: 219px;">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">{{pos.caption}}</h5>
+                                            <div class="post-grid-item">
+                                                <img src="{{pos.image.url}}" class="post-grid-image" alt="Post image">
+                                                <div class="post-grid-overlay">
+                                                    <div class="post-title text-light">{{pos.caption|truncatechars:30}}</div>
                                                     <div class="post-tags mb-2">
                                                         {% for tag in pos.tags.all %}
                                                         <a href="/tag/{{ tag.name }}" class="badge bg-light text-dark text-decoration-none">
@@ -193,13 +157,64 @@
                                                         </a>
                                                         {% endfor %}
                                                     </div>
-                                                    {% if user == user_profile.user %}
-                                                    <a href="/delete/{{pos.id}}"><i class="fa-solid fa-trash"></i></a>
-                                                    {% endif %}
+                                                    <div class="post-grid-overlay-stats">
+                                                        <span><i class="fas fa-heart"></i> {{pos.no_of_likes}}</span>
+                                                        <span><i class="fas fa-comment"></i> {{pos.comments.count}}</span>
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <a href="/post/{{pos.id}}" class="btn btn-sm btn-light me-2">
+                                                            <i class="fas fa-eye me-1"></i> View
+                                                        </a>
+                                                        {% if user == user_profile.user %}
+                                                        <a href="/delete/{{pos.id}}" class="btn btn-sm btn-danger">
+                                                            <i class="fa-solid fa-trash me-1"></i> Delete
+                                                        </a>
+                                                        {% endif %}
+                                                    </div>
                                                 </div>
                                             </div>
                                             {% endfor %}
                                         </div>
+                                        
+                                        {% if page_obj.has_other_pages %}
+                                        <div class="pagination-container mt-4">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination justify-content-center">
+                                                    {% if page_obj.has_previous %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                                            <span aria-hidden="true">&laquo;</span>
+                                                        </a>
+                                                    </li>
+                                                    {% else %}
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">&laquo;</span>
+                                                    </li>
+                                                    {% endif %}
+                                                    
+                                                    {% for num in page_obj.paginator.page_range %}
+                                                        {% if page_obj.number == num %}
+                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    
+                                                    {% if page_obj.has_next %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                                            <span aria-hidden="true">&raquo;</span>
+                                                        </a>
+                                                    </li>
+                                                    {% else %}
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">&raquo;</span>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
-from .models import Profile, Post
+from .models import Profile, Post, Comment
 
 username_validator = RegexValidator(
     r'^[a-zA-Z0-9._]{3,}$',
@@ -107,4 +107,20 @@ class ProfileForm(forms.ModelForm):
             'profileimg': forms.FileInput(attrs={
                 'class': 'form-control'
             })
+        }
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Add a comment...',
+                'rows': '2',
+                'id': 'commentText'
+            })
+        }
+        labels = {
+            'text': ''
         }

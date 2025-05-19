@@ -33,6 +33,17 @@ class LikePost(models.Model):
     def __str__(self):
         return self.username
 
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    user = models.CharField(max_length=100)
+    text = models.TextField()
+    created_at = models.DateTimeField(default=datetime.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user} on {self.post.id}: {self.text[:20]}"
 
 class Followers(models.Model):
     follower = models.CharField(max_length=100)

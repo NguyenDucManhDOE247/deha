@@ -1,6 +1,6 @@
 from itertools import chain
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
@@ -9,8 +9,9 @@ from django.db.models import Q, Prefetch, Count
 from django.core.paginator import Paginator
 import logging
 from django.contrib import messages
-from . models import Followers, LikePost, Post, Profile
-from .forms import SignUpForm, LoginForm, PostForm, ProfileForm
+from . models import Followers, LikePost, Post, Profile, Comment
+from .forms import SignUpForm, LoginForm, PostForm, ProfileForm, CommentForm
+from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +349,10 @@ def home_post(request, id):
         except (User.DoesNotExist, Profile.DoesNotExist):
             post_owner_profile = None
         
+        comments = Comment.objects.filter(post=post).select_related('post')
+        
+        comment_form = CommentForm()
+        
         all_profiles = Profile.objects.select_related('user').all()
         
         username_profile_map = {}
@@ -360,7 +365,9 @@ def home_post(request, id):
             'post_owner_profile': post_owner_profile,
             'all_profiles': all_profiles,
             'username_profile_map': username_profile_map,
-            'single_post_view': True  
+            'single_post_view': True,
+            'comments': comments,
+            'comment_form': comment_form
         }
         return render(request, 'main.html', context)
     except Post.DoesNotExist:
@@ -400,4 +407,60 @@ def follow(request):
             messages.error(request, "An error occurred while following")
             return redirect('/')
     else:
+        return redirect('/')
+
+@login_required(login_url='/login')
+@require_POST
+def add_comment(request, post_id):
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        form = CommentForm(request.POST)
+        
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.user = request.user.username
+            comment.save()
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success',
+                    'comment_id': str(comment.id),
+                    'user': comment.user,
+                    'text': comment.text,
+                    'created_at': comment.created_at.strftime('%b %d, %Y, %I:%M %p')
+                })
+            
+            messages.success(request, "Comment added successfully!")
+            return redirect(f'/post/{post_id}')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            
+            messages.error(request, "Error adding comment.")
+            return redirect(f'/post/{post_id}')
+    except Exception as e:
+        logger.error(f"Error in add_comment: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        
+        messages.error(request, "An error occurred while adding your comment")
+        return redirect(f'/post/{post_id}')
+
+@login_required(login_url='/login')
+def delete_comment(request, comment_id):
+    try:
+        comment = get_object_or_404(Comment, id=comment_id)
+        
+        if comment.user == request.user.username or comment.post.user == request.user.username:
+            post_id = comment.post.id
+            comment.delete()
+            messages.success(request, "Comment deleted successfully")
+            return redirect(f'/post/{post_id}')
+        else:
+            messages.error(request, "You don't have permission to delete this comment")
+            return redirect('/')
+    except Exception as e:
+        logger.error(f"Error in delete_comment: {e}")
+        messages.error(request, "An error occurred while deleting the comment")
         return redirect('/')

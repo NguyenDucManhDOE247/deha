@@ -191,6 +191,10 @@
                                     {% endif %}
                                 </div>
                             </div>
+
+                            {% if single_post_view %}
+                                {% include "comments.html" with comments=comments comment_form=comment_form post=post %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>

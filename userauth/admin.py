@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Profile, Post, LikePost, Followers
+from .models import Profile, Post, LikePost, Followers, Comment
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'location', 'profile_image_display', 'id_user')
@@ -38,10 +38,24 @@ class FollowersAdmin(admin.ModelAdmin):
     search_fields = ('follower', 'user')
     list_filter = ('follower', 'user')
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'text_preview', 'post_link', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user', 'text', 'post__id')
+    
+    def text_preview(self, obj):
+        return obj.text[:50] + "..." if len(obj.text) > 50 else obj.text
+    text_preview.short_description = 'Comment'
+    
+    def post_link(self, obj):
+        return format_html('<a href="/admin/userauth/post/{}">{}</a>', obj.post.id, obj.post.id)
+    post_link.short_description = 'Post'
+
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(LikePost, LikePostAdmin)
 admin.site.register(Followers, FollowersAdmin)
+admin.site.register(Comment, CommentAdmin)
 
 admin.site.site_header = "Social Media Administration"
 admin.site.site_title = "Social Media Admin Portal"

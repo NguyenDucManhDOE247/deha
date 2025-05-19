@@ -20,7 +20,8 @@ class SignUpForm(forms.Form):
         validators=[username_validator],
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Username'
+            'placeholder': ' ',
+            'id': 'signup-username'
         })
     )
     email = forms.EmailField(
@@ -28,7 +29,8 @@ class SignUpForm(forms.Form):
         required=True,
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Email'
+            'placeholder': ' ',
+            'id': 'signup-email'
         })
     )
     password = forms.CharField(
@@ -36,7 +38,8 @@ class SignUpForm(forms.Form):
         validators=[password_validator],
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Password'
+            'placeholder': ' ',
+            'id': 'signup-password'
         })
     )
 
@@ -58,14 +61,16 @@ class LoginForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Username'
+            'placeholder': ' ',
+            'id': 'login-username'
         })
     )
     password = forms.CharField(
         required=True,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Password'
+            'placeholder': ' ',
+            'id': 'login-password'
         })
     )
 

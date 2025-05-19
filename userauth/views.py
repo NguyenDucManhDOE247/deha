@@ -4,6 +4,11 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView, FormView
+from django.utils.decorators import method_decorator
+from django.urls import reverse_lazy, reverse
 from django.db import IntegrityError
 from django.db.models import Q, Prefetch, Count
 from django.core.paginator import Paginator
@@ -16,113 +21,122 @@ from django.views.decorators.http import require_POST
 logger = logging.getLogger(__name__)
 
 
-def signup(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            try:
-                username = form.cleaned_data.get('username')
-                email = form.cleaned_data.get('email')
-                password = form.cleaned_data.get('password')
-                
-                my_user = User.objects.create_user(username, email, password)
-                my_user.save()
-                
-                user_model = User.objects.get(username=username)
-                new_profile = Profile.objects.create(user=user_model, id_user=user_model.id)
-                new_profile.save()
-                
-                auth_login(request, my_user)
-                messages.success(request, "Account registration successful!")
-                return redirect('/')
-            except IntegrityError as e:
-                logger.error(f"IntegrityError in signup: {e}")
-                messages.error(request, "User already exists")
-            except Exception as e:
-                logger.error(f"Error in signup: {e}")
-                messages.error(request, "An error occurred, please try again")
-    else:
-        form = SignUpForm()
+class SignUpView(FormView):
+    template_name = 'signup.html'
+    form_class = SignUpForm
+    success_url = '/'
     
-    return render(request, 'signup.html', {'form': form})
+    def form_valid(self, form):
+        try:
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            
+            my_user = User.objects.create_user(username, email, password)
+            my_user.save()
+            
+            user_model = User.objects.get(username=username)
+            new_profile = Profile.objects.create(user=user_model, id_user=user_model.id)
+            new_profile.save()
+            
+            auth_login(self.request, my_user)
+            messages.success(self.request, "Account registration successful!")
+            return super().form_valid(form)
+        except IntegrityError as e:
+            logger.error(f"IntegrityError in signup: {e}")
+            messages.error(self.request, "User already exists")
+            return self.form_invalid(form)
+        except Exception as e:
+            logger.error(f"Error in signup: {e}")
+            messages.error(self.request, "An error occurred, please try again")
+            return self.form_invalid(form)
 
 
-def login(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            try:
-                username = form.cleaned_data.get('username')
-                password = form.cleaned_data.get('password')
-                
-                user = authenticate(request, username=username, password=password)
-                if user is not None:
-                    auth_login(request, user)
-                    messages.success(request, "Login successful!")
-                    return redirect('/')
-                
-                messages.error(request, "Invalid login credentials")
-            except Exception as e:
-                logger.error(f"Error in login: {e}")
-                messages.error(request, "An error occurred, please try again")
-    else:
-        form = LoginForm()
+class LoginView(FormView):
+    template_name = 'login.html'
+    form_class = LoginForm
+    success_url = '/'
     
-    return render(request, 'login.html', {'form': form})
-
-@login_required(login_url='/login')
-def logout_view(request):
-    logout(request)
-    messages.success(request, "Logout successful!")
-    return redirect('/login')
+    def form_valid(self, form):
+        try:
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            
+            user = authenticate(self.request, username=username, password=password)
+            if user is not None:
+                auth_login(self.request, user)
+                messages.success(self.request, "Login successful!")
+                return super().form_valid(form)
+            
+            messages.error(self.request, "Invalid login credentials")
+            return self.form_invalid(form)
+        except Exception as e:
+            logger.error(f"Error in login: {e}")
+            messages.error(self.request, "An error occurred, please try again")
+            return self.form_invalid(form)
 
 
-@login_required(login_url='/login')
-def home(request):
-    try:
-        profile = Profile.objects.get(user=request.user)
-    except Profile.DoesNotExist:
-        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-        profile.save()
-    
-    following_users = Followers.objects.filter(follower=request.user.username).values_list('user', flat=True)
-    
-    post = Post.objects.filter(
-        Q(user=request.user.username) | Q(user__in=following_users)
-    ).prefetch_related('comments', 'tags').order_by('-created_at')
-    
-    user_bookmarks = Bookmark.objects.filter(user=request.user.username).values_list('post_id', flat=True)
-    user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
-    
-    all_profiles = Profile.objects.select_related('user').all()
-    
-    username_profile_map = {}
-    for prof in all_profiles:
-        username_profile_map[prof.user.username] = prof
-    
-    paginator = Paginator(post, 10)  
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        messages.success(request, "Logout successful!")
+        return redirect('/login')
 
-    tag_list = Tag.objects.all().order_by('name')
-    
-    context = {
-        'post': page_obj,
-        'profile': profile,
-        'page_obj': page_obj,
-        'all_profiles': all_profiles,
-        'username_profile_map': username_profile_map,
-        'user': request.user.username,
-        'tag_list': tag_list,
-        'user_bookmarks': user_bookmarks,
-        'user_likes': user_likes,
-    }
-    return render(request, 'main.html', context)
-    
 
-@login_required(login_url='/login')
-def upload(request):
-    if request.method == 'POST':
+class HomeView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = 'main.html'
+    context_object_name = 'post'
+    paginate_by = 10
+    login_url = '/login'
+    
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            self.profile.save()
+    
+    def get_queryset(self):
+        following_users = Followers.objects.filter(follower=self.request.user.username).values_list('user', flat=True)
+        
+        queryset = Post.objects.filter(
+            Q(user=self.request.user.username) | Q(user__in=following_users)
+        ).prefetch_related('comments', 'tags').order_by('-created_at')
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        user_bookmarks = Bookmark.objects.filter(user=self.request.user.username).values_list('post_id', flat=True)
+        user_likes = LikePost.objects.filter(username=self.request.user.username).values_list('post_id', flat=True)
+        
+        all_profiles = Profile.objects.select_related('user').all()
+        
+        username_profile_map = {}
+        for prof in all_profiles:
+            username_profile_map[prof.user.username] = prof
+        
+        tag_list = Tag.objects.all().order_by('name')
+        
+        context.update({
+            'profile': self.profile,
+            'all_profiles': all_profiles,
+            'username_profile_map': username_profile_map,
+            'user': self.request.user.username,
+            'tag_list': tag_list,
+            'user_bookmarks': user_bookmarks,
+            'user_likes': user_likes,
+        })
+        return context
+
+
+class UploadPostView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def post(self, request):
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             try:
@@ -133,7 +147,6 @@ def upload(request):
                 form.save_m2m()
                 
                 messages.success(request, "Post created successfully!")
-                return redirect('/')
             except Exception as e:
                 logger.error(f"Error in upload: {e}")
                 messages.error(request, "An error occurred when creating the post")
@@ -141,11 +154,13 @@ def upload(request):
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{error}")
-    return redirect('/')
+        return redirect('/')
 
-@login_required(login_url='/login')
-def likes(request, id):
-    if request.method == 'GET':
+
+class LikePostView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def get(self, request, id):
         try:
             username = request.user.username
             post = get_object_or_404(Post, id=id)
@@ -177,12 +192,25 @@ def likes(request, id):
             logger.error(f"Error in likes: {e}")
             messages.error(request, "An error occurred during this operation")
             return redirect('/')
+
+
+class ExploreView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = 'explore.html'
+    context_object_name = 'post'
+    paginate_by = 12
+    login_url = '/login'
     
-@login_required(login_url='/login')
-def explore(request):
-    try:
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            self.profile.save()
+    
+    def get_queryset(self):
         posts = Post.objects.all().order_by('-created_at')
-        
         post_data = []
         for post in posts:
             try:
@@ -192,38 +220,33 @@ def explore(request):
             except (User.DoesNotExist, Profile.DoesNotExist):
                 pass
             post_data.append(post)
-            
-        paginator = Paginator(post_data, 12)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        
-        try:
-            profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            profile.save()
-
-        context = {
-            'post': page_obj,
-            'profile': profile,
-            'page_obj': page_obj,
-        }
-        return render(request, 'explore.html', context)
-    except Exception as e:
-        logger.error(f"Error in explore: {e}")
-        messages.error(request, "An error occurred while loading the explore page")
-        return redirect('/')
+        return post_data
     
-@login_required(login_url='/login')
-def profile(request, id_user):
-    try:
-        user_object = User.objects.get(username=id_user)
-        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile'] = self.profile
+        return context
+
+
+class ProfileView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = 'profile.html'
+    context_object_name = 'user_object'
+    slug_field = 'username'
+    slug_url_kwarg = 'id_user'
+    login_url = '/login'
+    
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
         try:
-            profile = Profile.objects.get(user=request.user)
+            self.profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            profile.save()
+            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            self.profile.save()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_object = self.get_object()
         
         try:
             user_profile = Profile.objects.get(user=user_object)
@@ -231,140 +254,152 @@ def profile(request, id_user):
             user_profile = Profile.objects.create(user=user_object, id_user=user_object.id)
             user_profile.save()
         
-        user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
+        user_posts = Post.objects.filter(user=user_object.username).order_by('-created_at')
         paginator = Paginator(user_posts, 9)  
-        page_number = request.GET.get('page')
+        page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
         user_post_length = user_posts.count() 
 
-        follower = request.user.username
-        user = id_user
+        follower = self.request.user.username
+        user = user_object.username
         
         if Followers.objects.filter(follower=follower, user=user).exists():
             follow_unfollow = 'Unfollow'
         else:
             follow_unfollow = 'Follow'
 
-        user_followers = Followers.objects.filter(user=id_user).count()
-        user_following = Followers.objects.filter(follower=id_user).count()
-
-        context = {
-            'user_object': user_object,
+        user_followers = Followers.objects.filter(user=user).count()
+        user_following = Followers.objects.filter(follower=user).count()
+        
+        context.update({
             'user_profile': user_profile,
-            'user_posts': page_obj, 
+            'user_posts': page_obj,
             'user_post_length': user_post_length,
-            'profile': profile,
+            'profile': self.profile,
             'follow_unfollow': follow_unfollow,
             'user_followers': user_followers,
             'user_following': user_following,
             'page_obj': page_obj,
-        }
+        })
         
-        if request.user.username == id_user:
-            if request.method == 'POST':
-                form = ProfileForm(request.POST, request.FILES, instance=user_profile)
+        if self.request.user.username == user_object.username:
+            if self.request.method == 'POST':
+                form = ProfileForm(self.request.POST, self.request.FILES, instance=user_profile)
                 if form.is_valid():
                     form.save()
-                    messages.success(request, "Profile updated successfully!")
-                    return redirect('/profile/'+id_user)
+                    messages.success(self.request, "Profile updated successfully!")
+                    return redirect('/profile/'+user_object.username)
                 else:
                     for field, errors in form.errors.items():
                         for error in errors:
-                            messages.error(request, f"{error}")
-            else:
-                form = ProfileForm(instance=user_profile)
+                            messages.error(self.request, f"{error}")
                 context['form'] = form
-                
-        return render(request, 'profile.html', context)
-    except User.DoesNotExist:
-        messages.error(request, "User not found")
-        return redirect('/')
-    except Exception as e:
-        logger.error(f"Error in profile view: {e}")
-        messages.error(request, "An error occurred while loading profile")
-        return redirect('/')
-
-@login_required(login_url='/login')
-def delete(request, id):
-    try:
-        post = Post.objects.get(id=id)
-        if post.user == request.user.username:
-            post.delete()
-            messages.success(request, "Post deleted successfully!")
-        else:
-            messages.error(request, "You don't have permission to delete this post")
-        return redirect('/profile/'+ request.user.username)
-    except Post.DoesNotExist:
-        messages.error(request, "Post not found")
-        return redirect('/profile/'+ request.user.username)
-    except Exception as e:
-        logger.error(f"Error in delete: {e}")
-        messages.error(request, "An error occurred while deleting the post")
-        return redirect('/profile/'+ request.user.username)
-
-
-@login_required(login_url='/login')
-def search_results(request):
-    try:
-        query = request.GET.get('q', '')
+            else:
+                context['form'] = ProfileForm(instance=user_profile)
         
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+
+class DeletePostView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def get(self, request, id):
         try:
-            profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            profile.save()
+            post = Post.objects.get(id=id)
+            if post.user == request.user.username:
+                post.delete()
+                messages.success(request, "Post deleted successfully!")
+            else:
+                messages.error(request, "You don't have permission to delete this post")
+            return redirect('/profile/'+ request.user.username)
+        except Post.DoesNotExist:
+            messages.error(request, "Post not found")
+            return redirect('/profile/'+ request.user.username)
+        except Exception as e:
+            logger.error(f"Error in delete: {e}")
+            messages.error(request, "An error occurred while deleting the post")
+            return redirect('/profile/'+ request.user.username)
 
-        users = Profile.objects.filter(user__username__icontains=query).select_related('user')
-        
-        posts_queryset = Post.objects.filter(caption__icontains=query)
-        posts = []
-        for post in posts_queryset:
+
+class SearchResultsView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def get(self, request):
+        try:
+            query = request.GET.get('q', '')
+            
             try:
-                post_owner = User.objects.get(username=post.user)
-                post_profile = Profile.objects.get(user=post_owner)
-                post.user_profile = post_profile
-            except (User.DoesNotExist, Profile.DoesNotExist):
-                pass
-            posts.append(post)
-        
-        posts_paginator = Paginator(posts, 6)
-        posts_page = request.GET.get('posts_page')
-        posts_page_obj = posts_paginator.get_page(posts_page)
-        
-        users_paginator = Paginator(users, 10)
-        users_page = request.GET.get('users_page')
-        users_page_obj = users_paginator.get_page(users_page)
+                profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                profile.save()
 
-        context = {
-            'query': query,
-            'users': users_page_obj,
-            'posts': posts_page_obj,
-            'profile': profile,
-            'users_page_obj': users_page_obj,
-            'posts_page_obj': posts_page_obj,
-        }
-        return render(request, 'search_user.html', context)
-    except Exception as e:
-        logger.error(f"Error in search_results: {e}")
-        messages.error(request, "An error occurred during search")
-        return redirect('/')
+            users = Profile.objects.filter(user__username__icontains=query).select_related('user')
+            
+            posts_queryset = Post.objects.filter(caption__icontains=query)
+            posts = []
+            for post in posts_queryset:
+                try:
+                    post_owner = User.objects.get(username=post.user)
+                    post_profile = Profile.objects.get(user=post_owner)
+                    post.user_profile = post_profile
+                except (User.DoesNotExist, Profile.DoesNotExist):
+                    pass
+                posts.append(post)
+            
+            posts_paginator = Paginator(posts, 6)
+            posts_page = request.GET.get('posts_page')
+            posts_page_obj = posts_paginator.get_page(posts_page)
+            
+            users_paginator = Paginator(users, 10)
+            users_page = request.GET.get('users_page')
+            users_page_obj = users_paginator.get_page(users_page)
 
-@login_required(login_url='/login')
-def home_post(request, id):
-    try:
-        post = get_object_or_404(Post, id=id)
-        
+            context = {
+                'query': query,
+                'users': users_page_obj,
+                'posts': posts_page_obj,
+                'profile': profile,
+                'users_page_obj': users_page_obj,
+                'posts_page_obj': posts_page_obj,
+            }
+            
+            return render(request, 'search_user.html', context)
+        except Exception as e:
+            logger.error(f"Error in search_results: {e}")
+            messages.error(request, "An error occurred during search")
+            return redirect('/')
+
+
+class SinglePostView(LoginRequiredMixin, DetailView):
+    model = Post
+    template_name = 'main.html'
+    context_object_name = 'post'
+    pk_url_kwarg = 'id'
+    login_url = '/login'
+    
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
         try:
-            profile = Profile.objects.get(user=request.user)
+            self.profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            profile.save()
+            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            self.profile.save()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = self.get_object()
         
         try:
             post_owner = User.objects.get(username=post.user)
             post_owner_profile = Profile.objects.get(user=post_owner)
-            post.user_profile = post_owner_profile  
+            post.user_profile = post_owner_profile
         except (User.DoesNotExist, Profile.DoesNotExist):
             post_owner_profile = None
         
@@ -377,30 +412,25 @@ def home_post(request, id):
         username_profile_map = {}
         for prof in all_profiles:
             username_profile_map[prof.user.username] = prof
-            
-        context = {
+        
+        context.update({
             'post': [post],  
-            'profile': profile,
+            'profile': self.profile,
             'post_owner_profile': post_owner_profile,
             'all_profiles': all_profiles,
             'username_profile_map': username_profile_map,
             'single_post_view': True,
             'comments': comments,
             'comment_form': comment_form
-        }
-        return render(request, 'main.html', context)
-    except Post.DoesNotExist:
-        messages.error(request, "Post not found")
-        return redirect('/')
-    except Exception as e:
-        logger.error(f"Error in home_post: {e}")
-        messages.error(request, "An error occurred while loading the post")
-        return redirect('/')
+        })
+        
+        return context
 
 
-@login_required(login_url='/login')
-def follow(request):
-    if request.method == 'POST':
+class FollowView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def post(self, request):
         try:
             follower = request.POST['follower']
             user = request.POST['user']
@@ -425,68 +455,90 @@ def follow(request):
             logger.error(f"Error in follow: {e}")
             messages.error(request, "An error occurred while following")
             return redirect('/')
-    else:
-        return redirect('/')
 
-@login_required(login_url='/login')
-@require_POST
-def add_comment(request, post_id):
-    try:
-        post = get_object_or_404(Post, id=post_id)
-        form = CommentForm(request.POST)
-        
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.user = request.user.username
-            comment.save()
-            
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'status': 'success',
-                    'comment_id': str(comment.id),
-                    'user': comment.user,
-                    'text': comment.text,
-                    'created_at': comment.created_at.strftime('%b %d, %Y, %I:%M %p')
-                })
-            
-            messages.success(request, "Comment added successfully!")
-            return redirect(f'/post/{post_id}')
-        else:
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
-            
-            messages.error(request, "Error adding comment.")
-            return redirect(f'/post/{post_id}')
-    except Exception as e:
-        logger.error(f"Error in add_comment: {e}")
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-        
-        messages.error(request, "An error occurred while adding your comment")
-        return redirect(f'/post/{post_id}')
 
-@login_required(login_url='/login')
-def delete_comment(request, comment_id):
-    try:
-        comment = get_object_or_404(Comment, id=comment_id)
-        
-        if comment.user == request.user.username or comment.post.user == request.user.username:
-            post_id = comment.post.id
-            comment.delete()
-            messages.success(request, "Comment deleted successfully")
+class AddCommentView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def post(self, request, post_id):
+        try:
+            post = get_object_or_404(Post, id=post_id)
+            form = CommentForm(request.POST)
+            
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.user = request.user.username
+                comment.save()
+                
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'status': 'success',
+                        'comment_id': str(comment.id),
+                        'user': comment.user,
+                        'text': comment.text,
+                        'created_at': comment.created_at.strftime('%b %d, %Y, %I:%M %p')
+                    })
+                
+                messages.success(request, "Comment added successfully!")
+                return redirect(f'/post/{post_id}')
+            else:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+                
+                messages.error(request, "Error adding comment.")
+                return redirect(f'/post/{post_id}')
+        except Exception as e:
+            logger.error(f"Error in add_comment: {e}")
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            
+            messages.error(request, "An error occurred while adding your comment")
             return redirect(f'/post/{post_id}')
-        else:
-            messages.error(request, "You don't have permission to delete this comment")
+
+
+class DeleteCommentView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def get(self, request, comment_id):
+        try:
+            comment = get_object_or_404(Comment, id=comment_id)
+            
+            if comment.user == request.user.username or comment.post.user == request.user.username:
+                post_id = comment.post.id
+                comment.delete()
+                messages.success(request, "Comment deleted successfully")
+                return redirect(f'/post/{post_id}')
+            else:
+                messages.error(request, "You don't have permission to delete this comment")
+                return redirect('/')
+        except Exception as e:
+            logger.error(f"Error in delete_comment: {e}")
+            messages.error(request, "An error occurred while deleting the comment")
             return redirect('/')
-    except Exception as e:
-        logger.error(f"Error in delete_comment: {e}")
-        messages.error(request, "An error occurred while deleting the comment")
-        return redirect('/')
 
-@login_required(login_url='/login')
-def manage_tags(request):
-    if request.method == 'POST':
+
+class ManageTagsView(LoginRequiredMixin, View):
+    login_url = '/login'
+    template_name = 'manage_tags.html'
+    
+    def get(self, request):
+        tags = Tag.objects.all().order_by('name')
+        
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            profile.save()
+        
+        context = {
+            'tags': tags,
+            'profile': profile,
+        }
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
         tag_name = request.POST.get('tag_name', '').strip()
         if tag_name:
             tag, created = Tag.objects.get_or_create(name=tag_name.lower())
@@ -496,37 +548,34 @@ def manage_tags(request):
                 messages.info(request, f"Tag '{tag_name}' already exists.")
         else:
             messages.error(request, "Tag name cannot be empty.")
-            
-    tags = Tag.objects.all().order_by('name')
-    
-    try:
-        profile = Profile.objects.get(user=request.user)
-    except Profile.DoesNotExist:
-        profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-        profile.save()
-    
-    context = {
-        'tags': tags,
-        'profile': profile,
-    }
-    
-    return render(request, 'manage_tags.html', context)
+        
+        return self.get(request)
 
-@login_required(login_url='/login')
-def tag_posts(request, tag_name):
-    try:
-        tag = get_object_or_404(Tag, name=tag_name)
+
+class TagPostsView(LoginRequiredMixin, DetailView):
+    model = Tag
+    template_name = 'tag_posts.html'
+    context_object_name = 'tag'
+    slug_field = 'name'
+    slug_url_kwarg = 'tag_name'
+    login_url = '/login'
+    
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            self.profile.save()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag = self.get_object()
+        
         posts = tag.posts.all().order_by('-created_at')
         
-        # Get user's bookmarks
-        user_bookmarks = Bookmark.objects.filter(user=request.user.username).values_list('post_id', flat=True)
+        user_bookmarks = Bookmark.objects.filter(user=self.request.user.username).values_list('post_id', flat=True)
         
-        try:
-            profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            profile.save()
-            
         all_profiles = Profile.objects.select_related('user').all()
         
         username_profile_map = {}
@@ -534,46 +583,46 @@ def tag_posts(request, tag_name):
             username_profile_map[prof.user.username] = prof
         
         paginator = Paginator(posts, 10)
-        page_number = request.GET.get('page')
+        page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
         tag_list = Tag.objects.all().order_by('name')
         
-        context = {
-            'tag': tag,
+        context.update({
             'post': page_obj,
-            'profile': profile,
+            'profile': self.profile,
             'page_obj': page_obj,
             'all_profiles': all_profiles,
             'username_profile_map': username_profile_map,
-            'user': request.user.username,
+            'user': self.request.user.username,
             'tag_list': tag_list,
             'user_bookmarks': user_bookmarks,
-        }
+        })
         
-        return render(request, 'tag_posts.html', context)
-    except Exception as e:
-        logger.error(f"Error in tag_posts: {e}")
-        messages.error(request, "An error occurred while loading posts")
-        return redirect('/')
+        return context
 
-@login_required(login_url='/login')
-def delete_tag(request, tag_id):
-    try:
-        tag = get_object_or_404(Tag, id=tag_id)
-        
-        tag_name = tag.name
-        tag.delete()
-        messages.success(request, f"Tag '{tag_name}' deleted successfully!")
-        return redirect('/tags/')
-    except Exception as e:
-        logger.error(f"Error in delete_tag: {e}")
-        messages.error(request, "An error occurred while deleting the tag")
-        return redirect('/tags/')
 
-@login_required(login_url='/login')
-def bookmark(request, id):
-    if request.method == 'GET':
+class DeleteTagView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def get(self, request, tag_id):
+        try:
+            tag = get_object_or_404(Tag, id=tag_id)
+            
+            tag_name = tag.name
+            tag.delete()
+            messages.success(request, f"Tag '{tag_name}' deleted successfully!")
+            return redirect('/tags/')
+        except Exception as e:
+            logger.error(f"Error in delete_tag: {e}")
+            messages.error(request, "An error occurred while deleting the tag")
+            return redirect('/tags/')
+
+
+class BookmarkView(LoginRequiredMixin, View):
+    login_url = '/login'
+    
+    def get(self, request, id):
         try:
             username = request.user.username
             post = get_object_or_404(Post, id=id)
@@ -603,43 +652,120 @@ def bookmark(request, id):
             messages.error(request, "An error occurred during this operation")
             return redirect('/')
 
-@login_required(login_url='/login')
-def bookmarks(request):
-    try:
-        user_bookmarks = Bookmark.objects.filter(user=request.user.username).order_by('-created_at')
-        bookmarked_posts = [bookmark.post for bookmark in user_bookmarks]
-        
-        user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
-        
+
+class BookmarksView(LoginRequiredMixin, ListView):
+    template_name = 'bookmarks.html'
+    context_object_name = 'post'
+    paginate_by = 10
+    login_url = '/login'
+    
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
         try:
-            profile = Profile.objects.get(user=request.user)
+            self.profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            profile.save()
-            
+            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+            self.profile.save()
+    
+    def get_queryset(self):
+        user_bookmarks = Bookmark.objects.filter(user=self.request.user.username).order_by('-created_at')
+        bookmarked_posts = [bookmark.post for bookmark in user_bookmarks]
+        return bookmarked_posts
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        user_bookmarks = Bookmark.objects.filter(user=self.request.user.username).values_list('post_id', flat=True)
+        user_likes = LikePost.objects.filter(username=self.request.user.username).values_list('post_id', flat=True)
+        
         all_profiles = Profile.objects.select_related('user').all()
         
         username_profile_map = {}
         for prof in all_profiles:
             username_profile_map[prof.user.username] = prof
         
-        paginator = Paginator(bookmarked_posts, 10)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        
-        context = {
-            'post': page_obj,
-            'profile': profile,
-            'page_obj': page_obj,
+        context.update({
+            'profile': self.profile,
             'all_profiles': all_profiles,
             'username_profile_map': username_profile_map,
-            'user': request.user.username,
-            'user_bookmarks': user_bookmarks.values_list('post_id', flat=True),
+            'user': self.request.user.username,
+            'user_bookmarks': user_bookmarks,
             'user_likes': user_likes,
-        }
+        })
         
-        return render(request, 'bookmarks.html', context)
-    except Exception as e:
-        logger.error(f"Error in bookmarks view: {e}")
-        messages.error(request, "An error occurred while loading bookmarks")
-        return redirect('/')
+        return context
+
+def signup(request):
+    return SignUpView.as_view()(request)
+
+def login(request):
+    return LoginView.as_view()(request)
+
+@login_required(login_url='/login')
+def logout_view(request):
+    return LogoutView.as_view()(request)
+
+@login_required(login_url='/login')
+def home(request):
+    return HomeView.as_view()(request)
+
+@login_required(login_url='/login')
+def upload(request):
+    return UploadPostView.as_view()(request)
+
+@login_required(login_url='/login')
+def likes(request, id):
+    return LikePostView.as_view()(request, id=id)
+
+@login_required(login_url='/login')
+def explore(request):
+    return ExploreView.as_view()(request)
+
+@login_required(login_url='/login')
+def profile(request, id_user):
+    return ProfileView.as_view()(request, id_user=id_user)
+
+@login_required(login_url='/login')
+def delete(request, id):
+    return DeletePostView.as_view()(request, id=id)
+
+@login_required(login_url='/login')
+def search_results(request):
+    return SearchResultsView.as_view()(request)
+
+@login_required(login_url='/login')
+def home_post(request, id):
+    return SinglePostView.as_view()(request, id=id)
+
+@login_required(login_url='/login')
+def follow(request):
+    return FollowView.as_view()(request)
+
+@login_required(login_url='/login')
+@require_POST
+def add_comment(request, post_id):
+    return AddCommentView.as_view()(request, post_id=post_id)
+
+@login_required(login_url='/login')
+def delete_comment(request, comment_id):
+    return DeleteCommentView.as_view()(request, comment_id=comment_id)
+
+@login_required(login_url='/login')
+def manage_tags(request):
+    return ManageTagsView.as_view()(request)
+
+@login_required(login_url='/login')
+def tag_posts(request, tag_name):
+    return TagPostsView.as_view()(request, tag_name=tag_name)
+
+@login_required(login_url='/login')
+def delete_tag(request, tag_id):
+    return DeleteTagView.as_view()(request, tag_id=tag_id)
+
+@login_required(login_url='/login')
+def bookmark(request, id):
+    return BookmarkView.as_view()(request, id=id)
+
+@login_required(login_url='/login')
+def bookmarks(request):
+    return BookmarksView.as_view()(request)

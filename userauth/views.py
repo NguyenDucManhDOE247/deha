@@ -92,11 +92,16 @@ class HomeView(LoginRequiredMixin, ListView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        try:
-            self.profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            self.profile.save()
+        # Only try to get the profile if the user is authenticated
+        if request.user.is_authenticated:
+            try:
+                self.profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                self.profile.save()
+        else:
+            # Set a default or None if the user is not authenticated
+            self.profile = None
     
     def get_queryset(self):
         following_users = Followers.objects.filter(follower=self.request.user.username).values_list('user', flat=True)
@@ -203,11 +208,16 @@ class ExploreView(LoginRequiredMixin, ListView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        try:
-            self.profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            self.profile.save()
+        # Only try to get the profile if the user is authenticated
+        if request.user.is_authenticated:
+            try:
+                self.profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                self.profile.save()
+        else:
+            # Set a default or None if the user is not authenticated
+            self.profile = None
     
     def get_queryset(self):
         posts = Post.objects.all().order_by('-created_at')
@@ -238,11 +248,16 @@ class ProfileView(LoginRequiredMixin, DetailView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        try:
-            self.profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            self.profile.save()
+        # Only try to get the profile if the user is authenticated
+        if request.user.is_authenticated:
+            try:
+                self.profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                self.profile.save()
+        else:
+            # Set a default or None if the user is not authenticated
+            self.profile = None
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -386,11 +401,16 @@ class SinglePostView(LoginRequiredMixin, DetailView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        try:
-            self.profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            self.profile.save()
+        # Only try to get the profile if the user is authenticated
+        if request.user.is_authenticated:
+            try:
+                self.profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                self.profile.save()
+        else:
+            # Set a default or None if the user is not authenticated
+            self.profile = None
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -562,11 +582,16 @@ class TagPostsView(LoginRequiredMixin, DetailView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        try:
-            self.profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            self.profile.save()
+        # Only try to get the profile if the user is authenticated
+        if request.user.is_authenticated:
+            try:
+                self.profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                self.profile.save()
+        else:
+            # Set a default or None if the user is not authenticated
+            self.profile = None
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -661,11 +686,16 @@ class BookmarksView(LoginRequiredMixin, ListView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        try:
-            self.profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
-            self.profile.save()
+        # Only try to get the profile if the user is authenticated
+        if request.user.is_authenticated:
+            try:
+                self.profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
+                self.profile.save()
+        else:
+            # Set a default or None if the user is not authenticated
+            self.profile = None
     
     def get_queryset(self):
         user_bookmarks = Bookmark.objects.filter(user=self.request.user.username).order_by('-created_at')

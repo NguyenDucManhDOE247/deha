@@ -92,7 +92,6 @@ class HomeView(LoginRequiredMixin, ListView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Only try to get the profile if the user is authenticated
         if request.user.is_authenticated:
             try:
                 self.profile = Profile.objects.get(user=request.user)
@@ -100,7 +99,6 @@ class HomeView(LoginRequiredMixin, ListView):
                 self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
                 self.profile.save()
         else:
-            # Set a default or None if the user is not authenticated
             self.profile = None
     
     def get_queryset(self):
@@ -208,7 +206,6 @@ class ExploreView(LoginRequiredMixin, ListView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Only try to get the profile if the user is authenticated
         if request.user.is_authenticated:
             try:
                 self.profile = Profile.objects.get(user=request.user)
@@ -216,7 +213,6 @@ class ExploreView(LoginRequiredMixin, ListView):
                 self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
                 self.profile.save()
         else:
-            # Set a default or None if the user is not authenticated
             self.profile = None
     
     def get_queryset(self):
@@ -248,7 +244,6 @@ class ProfileView(LoginRequiredMixin, DetailView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Only try to get the profile if the user is authenticated
         if request.user.is_authenticated:
             try:
                 self.profile = Profile.objects.get(user=request.user)
@@ -256,7 +251,6 @@ class ProfileView(LoginRequiredMixin, DetailView):
                 self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
                 self.profile.save()
         else:
-            # Set a default or None if the user is not authenticated
             self.profile = None
     
     def get_context_data(self, **kwargs):
@@ -401,7 +395,6 @@ class SinglePostView(LoginRequiredMixin, DetailView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Only try to get the profile if the user is authenticated
         if request.user.is_authenticated:
             try:
                 self.profile = Profile.objects.get(user=request.user)
@@ -409,7 +402,6 @@ class SinglePostView(LoginRequiredMixin, DetailView):
                 self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
                 self.profile.save()
         else:
-            # Set a default or None if the user is not authenticated
             self.profile = None
     
     def get_context_data(self, **kwargs):
@@ -582,7 +574,6 @@ class TagPostsView(LoginRequiredMixin, DetailView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Only try to get the profile if the user is authenticated
         if request.user.is_authenticated:
             try:
                 self.profile = Profile.objects.get(user=request.user)
@@ -590,7 +581,6 @@ class TagPostsView(LoginRequiredMixin, DetailView):
                 self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
                 self.profile.save()
         else:
-            # Set a default or None if the user is not authenticated
             self.profile = None
     
     def get_context_data(self, **kwargs):
@@ -686,7 +676,6 @@ class BookmarksView(LoginRequiredMixin, ListView):
     
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Only try to get the profile if the user is authenticated
         if request.user.is_authenticated:
             try:
                 self.profile = Profile.objects.get(user=request.user)
@@ -694,7 +683,6 @@ class BookmarksView(LoginRequiredMixin, ListView):
                 self.profile = Profile.objects.create(user=request.user, id_user=request.user.id)
                 self.profile.save()
         else:
-            # Set a default or None if the user is not authenticated
             self.profile = None
     
     def get_queryset(self):

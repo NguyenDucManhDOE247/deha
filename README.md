@@ -1,4 +1,4 @@
-# Social Media Platform
+# Social Media Platform - DEHA
 
 A modern, Django-based social media platform with features including user authentication, profiles, posts, likes, follows, comments, tags, and content exploration.
 
@@ -47,25 +47,20 @@ A modern, Django-based social media platform with features including user authen
 ## 🛠️ Technologies
 
 - **Backend**
-  - Django 5.2
-  - Python 3.8+
-  - SQLite (development)
+  - Django
+  - Python 3.11+
+  - SQLite database
 
 - **Frontend**
   - HTML5
   - CSS3
   - JavaScript
   - Bootstrap 5
-  - Font Awesome 6
+  - Font Awesome
 
 - **File Storage & Media**
   - Django's media handling for user uploads
   - Image processing with Pillow
-
-- **Development Tools**
-  - Environment variable management with python-dotenv
-  - Comprehensive logging system
-  - Custom template tags
 
 ## 🚀 Getting Started
 
@@ -79,8 +74,8 @@ A modern, Django-based social media platform with features including user authen
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/socialmedia.git
-   cd socialmedia
+   git clone https://github.com/yourusername/deha.git
+   cd deha
    ```
 
 2. **Create a virtual environment**
@@ -100,36 +95,25 @@ A modern, Django-based social media platform with features including user authen
 
 4. **Install dependencies**
    ```bash
-   pip install django pillow python-dotenv
+   pip install django pillow
    ```
 
-5. **Create environment variables**
+5. **Run migrations**
    ```bash
-   # Copy the example file
-   copy .env.example .env
-   
-   # Or create manually
-   echo SECRET_KEY=django-insecure-your-secret-key-here > .env
-   echo DEBUG=True >> .env
-   ```
-
-6. **Run migrations**
-   ```bash
-   python manage.py makemigrations userauth
    python manage.py migrate
    ```
 
-7. **Create a superuser (admin)**
+6. **Create a superuser (admin)**
    ```bash
    python manage.py createsuperuser
    ```
 
-8. **Start the development server**
+7. **Start the development server**
    ```bash
    python manage.py runserver
    ```
 
-9. **Access the application**
+8. **Access the application**
    - Web interface: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
    - Admin panel: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
 
@@ -161,7 +145,7 @@ A modern, Django-based social media platform with features including user authen
 ## 📁 Project Structure
 
 ```
-socialmedia/
+deha/
 │
 ├── socialmedia/          # Project configuration
 │   ├── settings.py       # Project settings
@@ -191,32 +175,37 @@ socialmedia/
 │   ├── search_user.html  # Search results page
 │   ├── comments.html     # Comments component
 │   ├── modal.html        # Post creation modal
-│   └── messages.html     # Flash messages component
+│   ├── messages.html     # Flash messages component
+│   ├── edit_profile.html # Profile editing page
+│   └── manage_tags.html  # Tag management page
 │
 ├── static/               # Static files
 │   ├── css/              # CSS styles
 │   ├── js/               # JavaScript files
 │   └── ico/              # Favicon and icons
 │
+├── staticfiles/          # Collected static files for production
+│
 ├── media/                # User-uploaded content
 │   ├── profile_images/   # Profile pictures
 │   └── post_images/      # Post images
 │
 ├── manage.py             # Django management script
-├── .env                  # Environment variables
-├── .env.example          # Example environment variables
+├── db.sqlite3            # SQLite database
+├── debug.log             # Debug logs
 └── README.md             # Project documentation
 ```
 
 ## 🔄 Database Models
 
-- **Profile**: User profile information
-- **Post**: User-created content with images and captions
-- **Comment**: Comments on posts
-- **LikePost**: Track post likes
-- **Followers**: Track user follow relationships
-- **Tag**: Post categorization
-- **Bookmark**: Saved posts
+The application uses the following main models:
+- User profiles
+- Posts
+- Comments
+- Likes
+- Followers
+- Tags
+- Bookmarks
 
 ## 👨‍💻 Development
 
@@ -236,62 +225,36 @@ socialmedia/
 - Follow PEP 8 for Python code
 - Use descriptive variable and function names
 - Include docstrings for functions and classes
-- Write unit tests for new functionality
 
 ## 🔒 Security Features
 
 - Passwords are hashed using Django's authentication system
 - CSRF protection enabled
 - Form validation with custom validators
-- Environment variables for sensitive settings
 - Session management
 - Secure permission checks for content manipulation
 
 ## ⚙️ Configuration
 
-The project uses environment variables for configuration:
+The project uses Django's settings system for configuration:
+- Debug mode can be enabled/disabled in settings.py
+- Media and static file paths are configured
+- Database settings can be adjusted as needed
 
-- `SECRET_KEY`: Django's secret key for cryptographic signing
-- `DEBUG`: Toggle debug mode (True/False)
-
-In production, additional security settings are automatically enabled:
-- Session and CSRF cookie security
-- SSL/HTTPS enforcement
-- HTTP Strict Transport Security
-
-## 🚀 Deployment Considerations
+## 🚀 Deployment
 
 For production deployment:
-
-1. Set `DEBUG=False` in your environment
+1. Set `DEBUG=False` in settings.py
 2. Configure a production database (PostgreSQL recommended)
 3. Set up proper static file serving
-4. Use a WSGI server like Gunicorn or uWSGI
+4. Use a WSGI server like Gunicorn
 5. Configure a reverse proxy like Nginx
-6. Set up proper media file storage (AWS S3, etc.)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+6. Set up proper media file storage
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgements
-
-- [Django](https://www.djangoproject.com/)
-- [Bootstrap](https://getbootstrap.com/)
-- [Font Awesome](https://fontawesome.com/)
-- [Pillow](https://python-pillow.org/)
-- All contributors who have helped shape this project
+This project is licensed under the MIT License.
 
 ---
 
-Developed with ❤️ by X
+Developed with ❤️

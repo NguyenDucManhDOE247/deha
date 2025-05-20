@@ -65,15 +65,26 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 10px var(--shadow-color);
   transition: transform 0.3s ease;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
 
-.sidebar-header {
+.sidebar-header, 
+.sidebar .text-center.mt-3 {
   text-align: center;
   margin-bottom: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  height: auto;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar .nav-item {
   margin-bottom: var(--spacing-sm);
+  height: auto;
 }
 
 .sidebar .nav-link {
@@ -83,6 +94,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  height: 48px;
 }
 
 .sidebar .nav-link:hover, .sidebar .nav-link.active {
@@ -95,6 +107,14 @@ h1, h2, h3, h4, h5, h6 {
   margin-right: var(--spacing-md);
   width: 20px;
   text-align: center;
+  font-size: 1rem;
+}
+
+/* Profile pic in sidebar */
+.sidebar .profile-pic {
+  width: 60px;
+  height: 60px;
+  margin-bottom: var(--spacing-sm);
 }
 
 /* Main content styling */

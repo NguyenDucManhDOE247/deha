@@ -61,10 +61,17 @@ class LoginView(FormView):
         try:
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
+            remember_me = form.cleaned_data.get('remember_me')
             
             user = authenticate(self.request, username=username, password=password)
             if user is not None:
                 auth_login(self.request, user)
+                
+                if not remember_me:
+                    self.request.session.set_expiry(0)
+                else:
+                    self.request.session.set_expiry(30 * 24 * 60 * 60)
+                
                 messages.success(self.request, "Login successful!")
                 return super().form_valid(form)
             

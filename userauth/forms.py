@@ -73,6 +73,13 @@ class LoginForm(forms.Form):
             'id': 'login-password'
         })
     )
+    remember_me = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'id': 'rememberMe'
+        })
+    )
 
 class PostForm(forms.ModelForm):
     tags = forms.ModelMultipleChoiceField(

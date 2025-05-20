@@ -496,6 +496,10 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--light-text);
   transition: all 0.3s ease;
   z-index: 3;
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
 }
 
 .auth-form .form-control:focus ~ .fa-lg,

@@ -48,8 +48,7 @@
                                             <div class="form-outline mb-4 position-relative">
                                                 {{ form.username }}
                                                 <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
-                                                <i class="fas fa-user fa-lg position-absolute"
-                                                    style="top: 14px; left: 15px; color: #6c757d;"></i>
+                                                <i class="fas fa-user fa-lg position-absolute"></i>
                                                 {% if form.username.errors %}
                                                 <div class="invalid-feedback d-block mt-1">
                                                     {{ form.username.errors }}
@@ -60,8 +59,7 @@
                                             <div class="form-outline mb-4 position-relative">
                                                 {{ form.password }}
                                                 <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
-                                                <i class="fas fa-lock fa-lg position-absolute"
-                                                    style="top: 14px; left: 15px; color: #6c757d;"></i>
+                                                <i class="fas fa-lock fa-lg position-absolute"></i>
                                                 {% if form.password.errors %}
                                                 <div class="invalid-feedback d-block mt-1">
                                                     {{ form.password.errors }}

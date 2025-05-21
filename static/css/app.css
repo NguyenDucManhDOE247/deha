@@ -27,14 +27,22 @@
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-circle: 50%;
+
+  /* Additional highlight variables for black & white theme */
+  --shine-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 100%);
+  --card-hover-bg: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  --card-hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 /* Base styles */
 body {
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   line-height: 1.6;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 a {
@@ -61,12 +69,13 @@ h1, h2, h3, h4, h5, h6 {
 /* Sidebar styling */
 .sidebar {
   background-color: #000000;
+  background-image: linear-gradient(180deg, #000000 0%, #181818 100%);
   height: 100vh;
   position: fixed;
   width: 16.666667%;
   padding: var(--spacing-lg);
   overflow-y: auto;
-  box-shadow: 0 0 10px var(--shadow-color);
+  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
   z-index: 1000;
   display: flex;
@@ -137,6 +146,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: var(--spacing-xl);
   min-height: 100vh;
   background-color: #FFFFFF;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Profile styling */
@@ -184,17 +195,18 @@ h1, h2, h3, h4, h5, h6 {
 /* Post card styling */
 .post-card {
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 16px;
   margin-bottom: var(--spacing-xl);
   overflow: hidden;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
   background-color: white;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .post-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+  border-color: #d0d0d0;
 }
 
 .post-image-container {
@@ -412,14 +424,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-control:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.1);
+  border-color: #000000;
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary {
-  background-color: #000000;
-  border-color: #000000;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  background-image: linear-gradient(135deg, #000000 0%, #222222 100%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
   padding: 0.8rem 2rem;
   font-weight: 500;
   border-radius: var(--radius-md);
@@ -427,10 +440,25 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 
+.btn-primary:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.8s;
+}
+
+.btn-primary:hover:before {
+  left: 100%;
+}
+
 .btn-primary:hover {
-  background-color: #333333;
+  background-image: linear-gradient(135deg, #222222 0%, #333333 100%);
   transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Hiệu ứng ripple cho nút */
@@ -621,13 +649,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #000000 0%, #303030 100%);
+  background: linear-gradient(135deg, #000000 0%, #222222 100%);
   color: white;
   border-bottom: none;
 }
 
 .modal-footer {
-  border-top: none;
+  background-color: #fafafa;
+  padding: var(--spacing-lg);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+/* Equal button styling in modals */
+.modal-footer .btn {
+  min-width: 120px;
+  text-align: center;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Tags management */
@@ -996,4 +1040,30 @@ body .sidebar {
   .form-container {
     padding: var(--spacing-md);
   }
+}
+
+/* Shiny animations for interactive elements */
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.btn-primary:hover {
+  animation: shine 1.5s infinite linear;
+  background-size: 200% 100%;
+}
+
+/* More pronounced button interactions */
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Better badge hover effect */
+.badge:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }

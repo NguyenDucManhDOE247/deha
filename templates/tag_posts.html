@@ -1,4 +1,5 @@
 {% load static %}
+{% load post_filters %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -115,14 +116,24 @@
                                 <div class="post-actions">
                                     <div class="d-flex">
                                         <a href="/like-post/{{pos.id}}" class="btn btn-outline-primary btn-sm me-2">
+                                            {% if pos.id|is_liked:user %}
+                                            <i class="fas fa-heart"></i> Liked
+                                            {% else %}
                                             <i class="far fa-heart"></i> Like
+                                            {% endif %}
                                         </a>
-                                        <a href="/bookmark-post/{{pos.id}}" class="btn btn-outline-secondary btn-sm">
-                                            {% if pos.id|stringformat:"s" in user_bookmarks %}
+                                        <a href="/bookmark-post/{{pos.id}}" class="btn btn-outline-secondary btn-sm me-2">
+                                            {% if pos.id|is_bookmarked:user %}
                                             <i class="fas fa-bookmark"></i> Saved
                                             {% else %}
                                             <i class="far fa-bookmark"></i> Save
                                             {% endif %}
+                                        </a>
+                                        <a href="/post/{{pos.id}}" class="btn btn-outline-info btn-sm">
+                                            <i class="far fa-comment"></i> 
+                                            {% with comment_count=pos.comments.count %}
+                                                {{ comment_count }} comment{{ comment_count|pluralize }}
+                                            {% endwith %}
                                         </a>
                                     </div>
                                     

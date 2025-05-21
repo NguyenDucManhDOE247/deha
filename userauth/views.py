@@ -128,14 +128,14 @@ class HomeView(LoginRequiredMixin, ListView):
         for prof in all_profiles:
             username_profile_map[prof.user.username] = prof
         
-        tag_list = Tag.objects.all().order_by('name')
+        tags_with_posts = Tag.objects.annotate(post_count=Count('posts')).filter(post_count__gt=0).order_by('name')
         
         context.update({
             'profile': self.profile,
             'all_profiles': all_profiles,
             'username_profile_map': username_profile_map,
             'user': self.request.user.username,
-            'tag_list': tag_list,
+            'tags_with_posts': tags_with_posts,
             'user_bookmarks': user_bookmarks,
             'user_likes': user_likes,
         })
@@ -236,7 +236,10 @@ class ExploreView(LoginRequiredMixin, ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['profile'] = self.profile
+        
+        context.update({
+            'profile': self.profile,
+        })
         return context
 
 
@@ -298,27 +301,38 @@ class ProfileView(LoginRequiredMixin, DetailView):
             'page_obj': page_obj,
         })
         
-        if self.request.user.username == user_object.username:
-            if self.request.method == 'POST':
-                form = ProfileForm(self.request.POST, self.request.FILES, instance=user_profile)
-                if form.is_valid():
-                    form.save()
-                    messages.success(self.request, "Profile updated successfully!")
-                    return redirect('/profile/'+user_object.username)
-                else:
-                    for field, errors in form.errors.items():
-                        for error in errors:
-                            messages.error(self.request, f"{error}")
-                context['form'] = form
-            else:
-                context['form'] = ProfileForm(instance=user_profile)
+        if self.request.user.username == user_object.username and self.request.method == 'GET':
+            context['form'] = ProfileForm(instance=user_profile)
         
         return context
     
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+        user_object = self.object
+        
+        try:
+            user_profile = Profile.objects.get(user=user_object)
+        except Profile.DoesNotExist:
+            user_profile = Profile.objects.create(user=user_object, id_user=user_object.id)
+            user_profile.save()
+        
+        if request.user.username == user_object.username:
+            form = ProfileForm(request.POST, request.FILES, instance=user_profile)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Profile updated successfully!")
+                return redirect('/profile/' + user_object.username)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{error}")
+                
+                context = self.get_context_data(object=self.object)
+                context['form'] = form
+                return self.render_to_response(context)
+        
+        messages.error(request, "You don't have permission to edit this profile")
+        return redirect('/')
 
 
 class DeletePostView(LoginRequiredMixin, View):
@@ -439,7 +453,7 @@ class SinglePostView(LoginRequiredMixin, DetailView):
             'username_profile_map': username_profile_map,
             'single_post_view': True,
             'comments': comments,
-            'comment_form': comment_form
+            'comment_form': comment_form,
         })
         
         return context
@@ -541,7 +555,7 @@ class ManageTagsView(LoginRequiredMixin, View):
     template_name = 'manage_tags.html'
     
     def get(self, request):
-        tags = Tag.objects.all().order_by('name')
+        tags = Tag.objects.filter(owner=request.user.username).order_by('name')
         
         try:
             profile = Profile.objects.get(user=request.user)
@@ -559,11 +573,15 @@ class ManageTagsView(LoginRequiredMixin, View):
     def post(self, request):
         tag_name = request.POST.get('tag_name', '').strip()
         if tag_name:
-            tag, created = Tag.objects.get_or_create(name=tag_name.lower())
-            if created:
-                messages.success(request, f"Tag '{tag_name}' created successfully!")
-            else:
+            existing_tag = Tag.objects.filter(name=tag_name.lower()).first()
+            if existing_tag:
                 messages.info(request, f"Tag '{tag_name}' already exists.")
+            else:
+                tag = Tag.objects.create(
+                    name=tag_name.lower(), 
+                    owner=request.user.username
+                )
+                messages.success(request, f"Tag '{tag_name}' created successfully!")
         else:
             messages.error(request, "Tag name cannot be empty.")
         
@@ -607,8 +625,6 @@ class TagPostsView(LoginRequiredMixin, DetailView):
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        tag_list = Tag.objects.all().order_by('name')
-        
         context.update({
             'post': page_obj,
             'profile': self.profile,
@@ -616,7 +632,6 @@ class TagPostsView(LoginRequiredMixin, DetailView):
             'all_profiles': all_profiles,
             'username_profile_map': username_profile_map,
             'user': self.request.user.username,
-            'tag_list': tag_list,
             'user_bookmarks': user_bookmarks,
         })
         
@@ -630,9 +645,13 @@ class DeleteTagView(LoginRequiredMixin, View):
         try:
             tag = get_object_or_404(Tag, id=tag_id)
             
-            tag_name = tag.name
-            tag.delete()
-            messages.success(request, f"Tag '{tag_name}' deleted successfully!")
+            if tag.owner == request.user.username:
+                tag_name = tag.name
+                tag.delete()
+                messages.success(request, f"Tag '{tag_name}' deleted successfully!")
+            else:
+                messages.error(request, "You don't have permission to delete this tag")
+            
             return redirect('/tags/')
         except Exception as e:
             logger.error(f"Error in delete_tag: {e}")

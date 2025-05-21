@@ -17,6 +17,7 @@ class Profile(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    owner = models.CharField(max_length=100, default='')  
     
     def __str__(self):
         return self.name

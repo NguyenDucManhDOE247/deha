@@ -85,9 +85,9 @@
                             </div>
                             <div class="card-body">
                                 <div class="tags-list">
-                                    {% for tag in tag_list %}
+                                    {% for tag in tags_with_posts %}
                                     <a href="/tag/{{ tag.name }}/" class="text-decoration-none">
-                                        <span class="badge {% if tag.name == active_tag %}bg-primary{% else %}{% if tag.posts.count > 0 %}bg-success{% else %}bg-light text-dark{% endif %}{% endif %} mb-2">
+                                        <span class="badge {% if tag.name == active_tag %}bg-primary{% else %}bg-success{% endif %} mb-2">
                                             <i class="fas fa-tag me-1"></i>{{ tag.name }} ({{ tag.posts.count }})
                                         </span>
                                     </a>

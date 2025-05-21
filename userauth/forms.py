@@ -24,15 +24,6 @@ class SignUpForm(forms.Form):
             'id': 'signup-username'
         })
     )
-    email = forms.EmailField(
-        max_length=254,
-        required=True,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': ' ',
-            'id': 'signup-email'
-        })
-    )
     password = forms.CharField(
         required=True,
         validators=[password_validator],
@@ -48,12 +39,6 @@ class SignUpForm(forms.Form):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("Username already exists.")
         return username
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("Email is already in use.")
-        return email
 
 class LoginForm(forms.Form):
     username = forms.CharField(

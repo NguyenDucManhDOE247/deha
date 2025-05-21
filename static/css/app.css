@@ -207,6 +207,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-5px);
   box-shadow: 0 20px 30px rgba(0,0,0,0.1);
   border-color: #d0d0d0;
+  background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
 }
 
 .post-image-container {
@@ -296,6 +297,8 @@ h1, h2, h3, h4, h5, h6 {
 .post-tags .badge:hover {
   background-color: #000000;
   color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
 /* Comment section */
@@ -1157,4 +1160,42 @@ select#id_tags option {
 /* Fix for modal tag container */
 .modal-body .mb-3 {
   margin-bottom: 1rem !important;
+}
+
+/* Thêm hiệu ứng sáng hơn khi hover vào các card */
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+  border-color: #d0d0d0;
+  background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+}
+
+/* Thêm hiệu ứng pulse nhẹ cho các thông báo */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.notification-dot {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Tăng tương phản nhẹ cho các phần tử nổi bật */
+.post-tags .badge:hover {
+  background-color: #000000;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* Cải thiện khả năng đọc của văn bản dài */
+p, .post-content {
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+
+/* Tạo hiệu ứng lấp lánh tinh tế cho các nút primary khi focus */
+.btn-primary:focus {
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.2), 0 0 15px rgba(255,255,255,0.5);
 }

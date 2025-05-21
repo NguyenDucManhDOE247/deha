@@ -1,5 +1,4 @@
 :root {
-  /* Color variables - black and white theme */
   --primary-color: #000000;
   --secondary-color: #404040;
   --accent-color: #707070;
@@ -11,31 +10,26 @@
   --shadow-color: rgba(0, 0, 0, 0.1);
   --hover-bg: rgba(0, 0, 0, 0.05);
 
-  /* Thêm màu điểm nhấn nhẹ nhàng */
   --highlight-color: #F5F5F5;
   --hover-highlight: #E0E0E0;
 
-  /* Spacing variables */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
 
-  /* Border radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-circle: 50%;
 
-  /* Additional highlight variables for black & white theme */
   --shine-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 100%);
   --card-hover-bg: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
   --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   --card-hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
-/* Base styles */
 body {
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
@@ -61,12 +55,10 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
 }
 
-/* Layout */
 .container-fluid {
   padding: 0;
 }
 
-/* Sidebar styling */
 .sidebar {
   background-color: #000000;
   background-image: linear-gradient(180deg, #000000 0%, #181818 100%);
@@ -124,7 +116,6 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1rem;
 }
 
-/* Profile pic in sidebar */
 .sidebar .profile-pic {
   width: 60px;
   height: 60px;
@@ -140,7 +131,6 @@ h1, h2, h3, h4, h5, h6 {
   color: #ffffff;
 }
 
-/* Main content styling */
 .main-content {
   margin-left: 16.666667%;
   padding: var(--spacing-xl);
@@ -150,7 +140,6 @@ h1, h2, h3, h4, h5, h6 {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Profile styling */
 .profile-pic {
   width: 60px;
   height: 60px;
@@ -192,7 +181,6 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-md);
 }
 
-/* Post card styling */
 .post-card {
   border: 1px solid var(--border-color);
   border-radius: 16px;
@@ -301,7 +289,6 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
-/* Comment section */
 .comments-section {
   padding: var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid var(--border-color);
@@ -317,7 +304,6 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--border-color);
 }
 
-/* Explore page */
 .post-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -385,7 +371,6 @@ h1, h2, h3, h4, h5, h6 {
   margin-right: 5px;
 }
 
-/* Form styling */
 .form-container {
   border: none;
   max-width: 100%;
@@ -464,7 +449,6 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Hiệu ứng ripple cho nút */
 .btn {
   position: relative;
   overflow: hidden;
@@ -489,7 +473,6 @@ h1, h2, h3, h4, h5, h6 {
   height: 200px;
 }
 
-/* Fix button sizes in modals */
 .modal-footer .btn {
   padding: 0.5rem 1.5rem;
   font-size: 1rem;
@@ -506,7 +489,6 @@ h1, h2, h3, h4, h5, h6 {
   border-color: #000000;
 }
 
-/* Auth page specific styles */
 .auth-illustration {
   max-width: 100%;
   height: auto;
@@ -624,7 +606,6 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: 2px;
 }
 
-/* Alert/messages styling */
 .alert {
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-lg);
@@ -643,7 +624,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Modal styling */
 .modal-content {
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -664,7 +644,6 @@ h1, h2, h3, h4, h5, h6 {
   gap: var(--spacing-md);
 }
 
-/* Equal button styling in modals */
 .modal-footer .btn {
   min-width: 120px;
   text-align: center;
@@ -676,7 +655,6 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
-/* Tags management */
 .tags-list {
   display: flex;
   flex-wrap: wrap;
@@ -701,7 +679,6 @@ h1, h2, h3, h4, h5, h6 {
   color: #c00000;
 }
 
-/* Search results */
 .search-results-container {
   margin-top: var(--spacing-xl);
 }
@@ -734,7 +711,6 @@ h1, h2, h3, h4, h5, h6 {
   margin-right: var(--spacing-md);
 }
 
-/* Search page sidebar fix */
 .search_user .sidebar,
 .search-user .sidebar,
 .search_results .sidebar,
@@ -754,18 +730,15 @@ h1, h2, h3, h4, h5, h6 {
   color: #ffffff !important;
 }
 
-/* Make sure all text in sidebar is visible against black background */
 .sidebar a, .sidebar .nav-link, .sidebar h4, .sidebar p {
   color: #ffffff !important;
 }
 
-/* Ensure all pages have consistent sidebar styling */
 body .sidebar {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
 
-/* Override Bootstrap's default styles for consistency across all pages */
 .card-header.bg-primary,
 .bg-primary,
 .btn-primary {
@@ -774,7 +747,6 @@ body .sidebar {
   color: #ffffff !important;
 }
 
-/* Ensure proper button sizes in create post modal */
 #exampleModal .modal-footer .btn-primary {
   padding: 0.5rem 1.5rem;
   font-size: 1rem;
@@ -786,7 +758,6 @@ body .sidebar {
   font-size: 1rem;
 }
 
-/* Loading spinner */
 .loading-spinner {
   display: inline-block;
   width: 40px;
@@ -802,7 +773,6 @@ body .sidebar {
   100% { transform: rotate(360deg); }
 }
 
-/* Bookmarks */
 .bookmark-icon {
   transition: all 0.3s ease;
 }
@@ -812,7 +782,6 @@ body .sidebar {
   color: #000000;
 }
 
-/* Notifications */
 .notification-dot {
   position: absolute;
   top: 5px;
@@ -823,7 +792,6 @@ body .sidebar {
   border-radius: var(--radius-circle);
 }
 
-/* Animations */
 .fade-in {
   animation: fadeIn 0.5s ease forwards;
 }
@@ -833,7 +801,6 @@ body .sidebar {
   to { opacity: 1; }
 }
 
-/* Tooltips */
 [data-tooltip] {
   position: relative;
 }
@@ -861,7 +828,6 @@ body .sidebar {
   bottom: calc(100% + 5px);
 }
 
-/* Button style overrides */
 .btn-outline-primary {
   color: #000000;
   border-color: #000000;
@@ -904,7 +870,6 @@ body .sidebar {
   color: #ffffff;
 }
 
-/* Badge styling */
 .badge.bg-light {
   background-color: #f0f0f0 !important;
   color: #000000 !important;
@@ -925,7 +890,6 @@ body .sidebar {
   color: #ffffff !important;
 }
 
-/* User result card */
 .user-result {
   padding: 15px;
   border: 1px solid #e0e0e0;
@@ -956,19 +920,16 @@ body .sidebar {
   object-fit: cover;
 }
 
-/* Card styling for manage tags page */
 .card-header.bg-primary {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
 
-/* Ensure all .bg-primary elements follow the black theme */
 .bg-primary {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
 
-/* Responsive design */
 @media (max-width: 991.98px) {
   .sidebar {
     width: 25%;
@@ -1044,7 +1005,6 @@ body .sidebar {
   }
 }
 
-/* Shiny animations for interactive elements */
 @keyframes shine {
   0% {
     background-position: -100% 0;
@@ -1059,18 +1019,15 @@ body .sidebar {
   background-size: 200% 100%;
 }
 
-/* More pronounced button interactions */
 .btn:active {
   transform: translateY(1px);
 }
 
-/* Better badge hover effect */
 .badge:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Fix for select dropdown and tags in new post form */
 select.form-control[multiple] {
   height: auto;
   min-height: 120px;
@@ -1090,20 +1047,17 @@ select.form-control[multiple] option:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* Fix for tags management in modals */
 #exampleModal .modal-body,
 #exampleModal .modal-content {
   overflow: visible !important;
 }
 
-/* Fix for tags select visibility */
 #id_tags {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* Improve tag display in dropdowns */
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
   background-color: #000000;
   color: #ffffff;
@@ -1116,7 +1070,6 @@ select.form-control[multiple] option:hover {
   background-color: #000000;
 }
 
-/* Fix for Create Post modal */
 #exampleModal {
   z-index: 1050;
 }
@@ -1125,7 +1078,6 @@ select.form-control[multiple] option:hover {
   max-width: 600px;
 }
 
-/* Fix for tags display in modal across all pages */
 #exampleModal select.form-control[multiple] {
   display: block !important;
   visibility: visible !important;
@@ -1134,34 +1086,28 @@ select.form-control[multiple] option:hover {
   height: auto !important;
 }
 
-/* Fix modal tag loading issues */
 #exampleModal .modal-body {
   min-height: 300px;
 }
 
-/* Ensure tags are always visible */
 .modal select#id_tags option {
   display: block !important;
 }
 
-/* Fix for modal initialization */
 .modal.fade {
   transition: opacity 0.15s linear;
 }
 
-/* Add consistent style for tag options */
 select#id_tags option {
   padding: 0.5rem;
   margin-bottom: 2px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* Fix for modal tag container */
 .modal-body .mb-3 {
   margin-bottom: 1rem !important;
 }
 
-/* Thêm hiệu ứng sáng hơn khi hover vào các card */
 .post-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 30px rgba(0,0,0,0.1);
@@ -1169,7 +1115,6 @@ select#id_tags option {
   background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
 }
 
-/* Thêm hiệu ứng pulse nhẹ cho các thông báo */
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
@@ -1180,7 +1125,6 @@ select#id_tags option {
   animation: pulse 2s infinite ease-in-out;
 }
 
-/* Tăng tương phản nhẹ cho các phần tử nổi bật */
 .post-tags .badge:hover {
   background-color: #000000;
   color: white;
@@ -1188,13 +1132,11 @@ select#id_tags option {
   box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
-/* Cải thiện khả năng đọc của văn bản dài */
 p, .post-content {
   line-height: 1.7;
   letter-spacing: 0.01em;
 }
 
-/* Tạo hiệu ứng lấp lánh tinh tế cho các nút primary khi focus */
 .btn-primary:focus {
   box-shadow: 0 0 0 3px rgba(0,0,0,0.2), 0 0 15px rgba(255,255,255,0.5);
 }

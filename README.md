@@ -46,6 +46,7 @@ A modern, Django-based social media platform with features including user authen
   - Mobile-friendly layout
   - Intuitive navigation and user interface
   - FontAwesome icons integration
+  - CSS animations and transitions
 
 ## 🛠️ Technologies
 
@@ -57,7 +58,7 @@ A modern, Django-based social media platform with features including user authen
 
 - **Frontend**
   - HTML5 with Django templates
-  - CSS3 with custom styling
+  - CSS3 with custom styling and animations
   - JavaScript for interactive features
   - Bootstrap 5 for responsive design
   - Font Awesome icons
@@ -74,6 +75,13 @@ A modern, Django-based social media platform with features including user authen
   - CSRF protection
   - Secure session management
   - Permission-based access control
+
+- **UI/UX Design**
+  - Custom CSS variables system
+  - Responsive grid layouts
+  - Animation effects for user interactions
+  - Card-based content design
+  - Custom tooltips and notification indicators
 
 ## 🚀 Getting Started
 
@@ -244,6 +252,44 @@ The application uses the following main models:
   - Records which users bookmarked which posts
   - Enforces unique bookmarks per user
 
+## 💎 UI/UX Design System
+
+DEHA uses a sophisticated design system built on CSS variables and custom components:
+
+### Core Design Elements
+
+- **Color Palette**
+  - Primary: Black (#000000)
+  - Secondary: Dark Gray (#404040)
+  - Accent: Medium Gray (#707070)
+  - Background: White (#FFFFFF)
+  - Text: Black (#000000) and Gray (#404040)
+  - Border: Light Gray (#E0E0E0)
+
+- **Typography**
+  - System font stack with fallbacks
+  - Clear hierarchy with varied font weights
+  - Optimized line height (1.6) for readability
+
+- **Animation System**
+  - Fade-in effects for content loading
+  - Hover transitions for interactive elements
+  - Transform animations for buttons and cards
+  - Pulse animations for notification indicators
+
+- **Component Design**
+  - Card-based post layout with hover effects
+  - Custom form elements with floating labels
+  - Gradient backgrounds for visual hierarchy
+  - Consistent border radiuses and shadow styles
+
+### Responsive Design
+
+- Fluid layouts that adapt to different screen sizes
+- Mobile-first approach with media queries
+- Sidebar collapses to horizontal navigation on small screens
+- Responsive image handling to maintain performance
+
 ## 👨‍💻 Development
 
 ### Adding New Features
@@ -263,6 +309,7 @@ The application uses the following main models:
 - Use descriptive variable and function names
 - Include docstrings for functions and classes
 - Use Django's class-based views where appropriate
+- Follow CSS naming conventions for styling
 
 ## 🔒 Security Features
 
@@ -273,6 +320,7 @@ The application uses the following main models:
 - Login-required decorators and mixins
 - Permission checks for content manipulation
 - Secure media file handling
+- Protection against SQL injection via ORM
 
 ## ⚙️ Configuration
 
@@ -282,6 +330,31 @@ The project uses Django's settings system with environment variables:
 - Media and static file paths configured
 - Database settings adjustable
 - Comprehensive logging configuration
+- Session expiry settings
+
+## 🧪 Testing
+
+To run the test suite:
+
+```bash
+python manage.py test
+```
+
+Key testing areas:
+- Authentication workflows
+- Post creation and interaction
+- User following functionality
+- Tag and bookmark systems
+- Form validations
+
+## 🌐 Browser Support
+
+The application is designed to work on modern browsers:
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Android Chrome)
 
 ## 🚀 Deployment
 
@@ -293,6 +366,7 @@ For production deployment:
 5. Configure a reverse proxy like Nginx
 6. Set up proper media file storage
 7. Enable HTTPS with properly configured settings
+8. Implement media file optimization and caching
 
 ## 📄 License
 

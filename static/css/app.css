@@ -1067,3 +1067,94 @@ body .sidebar {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+/* Fix for select dropdown and tags in new post form */
+select.form-control[multiple] {
+  height: auto;
+  min-height: 120px;
+  padding: 0.5rem;
+  background-color: #ffffff;
+}
+
+select.form-control[multiple] option {
+  padding: 0.5rem;
+  margin-bottom: 0.25rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+select.form-control[multiple] option:checked,
+select.form-control[multiple] option:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Fix for tags management in modals */
+#exampleModal .modal-body,
+#exampleModal .modal-content {
+  overflow: visible !important;
+}
+
+/* Fix for tags select visibility */
+#id_tags {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Improve tag display in dropdowns */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #000000;
+}
+
+/* Fix for Create Post modal */
+#exampleModal {
+  z-index: 1050;
+}
+
+#exampleModal .modal-dialog {
+  max-width: 600px;
+}
+
+/* Fix for tags display in modal across all pages */
+#exampleModal select.form-control[multiple] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 120px;
+  height: auto !important;
+}
+
+/* Fix modal tag loading issues */
+#exampleModal .modal-body {
+  min-height: 300px;
+}
+
+/* Ensure tags are always visible */
+.modal select#id_tags option {
+  display: block !important;
+}
+
+/* Fix for modal initialization */
+.modal.fade {
+  transition: opacity 0.15s linear;
+}
+
+/* Add consistent style for tag options */
+select#id_tags option {
+  padding: 0.5rem;
+  margin-bottom: 2px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Fix for modal tag container */
+.modal-body .mb-3 {
+  margin-bottom: 1rem !important;
+}

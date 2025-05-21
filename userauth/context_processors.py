@@ -3,8 +3,8 @@ from django.db import models
 
 def tag_list(request):
     """
-    Context processor to add tag_list to all templates - filtered to only include tags with posts
+    Context processor to add tag_list to all templates - including all tags
     """
     return {
-        'tag_list': Tag.objects.annotate(post_count=models.Count('posts')).filter(post_count__gt=0).order_by('name')
+        'tag_list': Tag.objects.all().order_by('name')
     }

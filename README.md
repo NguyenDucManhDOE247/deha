@@ -374,4 +374,4 @@ This project is licensed under the MIT License.
 
 ---
 
-Developed with ❤️ Team 2
+Developed with ❤️ by Nguyen Duc Manh

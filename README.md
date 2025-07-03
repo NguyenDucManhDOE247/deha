@@ -1,4 +1,4 @@
-# Social Media Platform - DEHA
+# Social Media Platform
 
 A modern, Django-based social media platform with features including user authentication, profiles, posts, likes, follows, comments, tags, and content exploration.
 
